@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, FolderKanban, Wrench, Briefcase, LogOut, ExternalLink } from 'lucide-react'
+import { LayoutDashboard, FolderKanban, Wrench, Briefcase, FileText, LogOut, ExternalLink } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
 const navItems = [
@@ -8,6 +8,7 @@ const navItems = [
   { label: 'Projects', href: '/admin/projects', icon: FolderKanban },
   { label: 'Skills', href: '/admin/skills', icon: Wrench },
   { label: 'Experience', href: '/admin/experience', icon: Briefcase },
+  { label: 'Resume', href: '/admin/resume', icon: FileText },
 ]
 
 export default function AdminLayout() {

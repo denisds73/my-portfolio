@@ -9,6 +9,7 @@ import AdminDashboard from '@/pages/admin/Dashboard'
 import ProjectsManager from '@/pages/admin/ProjectsManager'
 import SkillsManager from '@/pages/admin/SkillsManager'
 import ExperienceManager from '@/pages/admin/ExperienceManager'
+import ResumeManager from '@/pages/admin/ResumeManager'
 
 export default function App() {
   return (
@@ -33,6 +34,7 @@ export default function App() {
           <Route path="projects" element={<ProjectsManager />} />
           <Route path="skills" element={<SkillsManager />} />
           <Route path="experience" element={<ExperienceManager />} />
+          <Route path="resume" element={<ResumeManager />} />
         </Route>
       </Routes>
     </BrowserRouter>

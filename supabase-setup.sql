@@ -132,3 +132,35 @@ create trigger on_project_update
   before update on public.projects
   for each row
   execute function public.handle_updated_at();
+
+-- 5. Resume (single-row JSONB document)
+-- ============================================
+
+create table if not exists public.resume (
+  id uuid default gen_random_uuid() primary key,
+  singleton boolean not null default true unique,
+  data jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.resume enable row level security;
+
+create policy "Public can read resume"
+  on public.resume for select
+  to anon, authenticated
+  using (true);
+
+create policy "Authenticated users can insert resume"
+  on public.resume for insert
+  to authenticated
+  with check (true);
+
+create policy "Authenticated users can update resume"
+  on public.resume for update
+  to authenticated
+  using (true);
+
+create policy "Authenticated users can delete resume"
+  on public.resume for delete
+  to authenticated
+  using (true);

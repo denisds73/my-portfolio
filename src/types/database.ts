@@ -1,3 +1,5 @@
+import type { ResumeData } from './resume'
+
 export interface Database {
   public: {
     Tables: {
@@ -17,6 +19,12 @@ export interface Database {
         Row: Experience
         Insert: Omit<Experience, 'id' | 'created_at'>
         Update: Partial<Omit<Experience, 'id' | 'created_at'>>
+        Relationships: []
+      }
+      resume: {
+        Row: ResumeRow
+        Insert: Omit<ResumeRow, 'id' | 'updated_at'> & { updated_at?: string }
+        Update: Partial<Omit<ResumeRow, 'id'>>
         Relationships: []
       }
     }
@@ -62,4 +70,11 @@ export interface Experience {
   description: string
   sort_order: number
   created_at: string
+}
+
+export interface ResumeRow {
+  id: string
+  singleton: boolean
+  data: ResumeData
+  updated_at: string
 }
