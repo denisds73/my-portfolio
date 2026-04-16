@@ -126,7 +126,7 @@ export default function Navbar() {
 
         {/* Desktop resume button */}
         <a
-          href="/resume.pdf"
+          href="/resume"
           target="_blank"
           rel="noopener noreferrer"
           className="hidden items-center gap-1.5 rounded-sm border border-border px-4 py-2 font-body text-[0.8125rem] tracking-[0.02em] text-text-muted transition-colors duration-300 hover:border-accent hover:text-accent md:inline-flex"
@@ -189,7 +189,7 @@ export default function Navbar() {
 
               {/* Mobile resume link */}
               <motion.a
-                href="/resume.pdf"
+                href="/resume"
                 target="_blank"
                 rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 20 }}

@@ -12,6 +12,7 @@ import CertificationsEditor from '@/components/admin/resume/CertificationsEditor
 import ResumePreview from '@/components/admin/resume/ResumePreview'
 import ResumeDocument from '@/components/admin/resume/ResumeDocument'
 import { pdfFileName } from '@/lib/resumeFormat'
+import { RESUME_PRINT_PAGE_STYLE } from '@/lib/resumePrintStyle'
 
 function relativeTime(from: Date | null, now: Date): string {
   if (!from) return ''
@@ -24,58 +25,6 @@ function relativeTime(from: Date | null, now: Date): string {
   if (hrs < 24) return `${hrs}h ago`
   return from.toLocaleString()
 }
-
-const PRINT_PAGE_STYLE = `
-  @page {
-    size: Letter;
-    /* Applied to every page, including continuations. This is what
-       browser-generated PDFs honor across page breaks — CSS padding
-       on the content box does NOT repeat between pages. */
-    margin: 0.55in 0.6in;
-
-    /* Firefox/Safari honor these; Chrome ignores them (user must
-       uncheck "Headers and footers" in the print dialog). */
-    @top-left     { content: ""; }
-    @top-center   { content: ""; }
-    @top-right    { content: ""; }
-    @bottom-left  { content: ""; }
-    @bottom-center{ content: ""; }
-    @bottom-right { content: ""; }
-  }
-  @media print {
-    html, body {
-      margin: 0 !important;
-      padding: 0 !important;
-      background: #ffffff !important;
-      color: #1a1a1a !important;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-    /* @page margin already frames each page — strip the document's on-screen
-       padding so it doesn't double up on the first page. */
-    [data-resume-document] {
-      padding: 0 !important;
-      box-shadow: none !important;
-    }
-    /* Keep each entry (one role, one project, one degree, one cert) intact
-       across page breaks — no splitting a single bullet from its heading. */
-    [data-resume-entry] {
-      break-inside: avoid;
-      page-break-inside: avoid;
-    }
-    /* A section heading should never be the last line on a page. */
-    [data-resume-section-header] {
-      break-after: avoid-page;
-      page-break-after: avoid;
-    }
-    /* Keep the heading with at least its first entry. */
-    [data-resume-section] > :first-child + * {
-      break-before: avoid;
-      page-break-before: avoid;
-    }
-    a { color: inherit !important; text-decoration: none !important; }
-  }
-`
 
 export default function ResumeManager() {
   const { data, setData, status, lastSavedAt } = useResume()
@@ -90,7 +39,7 @@ export default function ResumeManager() {
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: pdfFileName(data.personal).replace(/\.pdf$/, ''),
-    pageStyle: PRINT_PAGE_STYLE,
+    pageStyle: RESUME_PRINT_PAGE_STYLE,
   })
 
   const statusChip = (() => {
