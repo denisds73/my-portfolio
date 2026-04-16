@@ -21,8 +21,6 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
     return () => { observerRef.current?.disconnect() }
   }, [])
 
-  const isFeatured = index === 0
-  const isEven = index % 2 === 0
   const number = String(index + 1).padStart(2, '0')
 
   const allImages = project.images?.length > 0
@@ -31,49 +29,53 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
       ? [project.thumbnail_url]
       : []
 
-  // Staggered widths: featured = full, others alternate wide-left / wide-right
-  const cardWidth = isFeatured
-    ? 'md:col-span-10 md:col-start-2'
-    : isEven
-      ? 'md:col-span-8 md:col-start-1'
-      : 'md:col-span-8 md:col-start-5'
-
   return (
-    <div
-      ref={cardRef}
-      className={`col-span-12 ${cardWidth}`}
-    >
-      {/* Image — full width, natural proportions, no cropping */}
+    <article ref={cardRef} className="group">
+      {/* Screenshot frame */}
       <div
-        className={`reveal overflow-hidden rounded-sm border border-border bg-bg-card ${visible ? 'visible' : ''}`}
+        className={`reveal overflow-hidden rounded-lg border border-border bg-[#111] p-2 md:p-3 ${visible ? 'visible' : ''}`}
         style={{ transitionDelay: '0.1s' }}
       >
-        {allImages.length > 0 ? (
-          <ProjectCarousel images={allImages} title={project.title} />
-        ) : (
-          <div className="flex aspect-[16/9] items-center justify-center">
-            <span className="select-none font-display text-[clamp(2rem,4vw,4rem)] font-bold leading-none tracking-tight text-text-primary opacity-[0.04]">
-              {project.title}
-            </span>
-          </div>
-        )}
+        <div className="overflow-hidden rounded-md">
+          {allImages.length > 0 ? (
+            <ProjectCarousel images={allImages} title={project.title} />
+          ) : (
+            <div className="flex aspect-[16/10] items-center justify-center bg-bg-card">
+              <span className="select-none font-display text-[clamp(2rem,4vw,4rem)] font-bold leading-none tracking-tight text-text-primary opacity-[0.04]">
+                {project.title}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Project info — directly below the image */}
+      {/* Project info */}
       <div
-        className={`reveal mt-6 ${visible ? 'visible' : ''}`}
+        className={`reveal mt-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:gap-8 ${visible ? 'visible' : ''}`}
         style={{ transitionDelay: '0.2s' }}
       >
-        <div className="flex items-baseline justify-between gap-4">
+        {/* Left: title + description */}
+        <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-3">
-            <span className="type-label text-text-muted">{number}</span>
-            {isFeatured && (
-              <span className="rounded-sm bg-accent-glow px-2 py-0.5 font-body text-[0.6rem] font-medium uppercase tracking-[0.1em] text-accent">
-                Featured
-              </span>
-            )}
+            <span className="font-body text-xs tabular-nums tracking-wider text-text-muted">{number}</span>
+            <h3 className="type-project-title">{project.title}</h3>
           </div>
-          <div className="flex gap-4">
+          <p className="type-body mt-2 max-w-2xl">{project.description}</p>
+        </div>
+
+        {/* Right: tech + links */}
+        <div className="shrink-0 md:text-right">
+          <div className="flex flex-wrap gap-1.5 md:justify-end">
+            {project.tech_stack.map((tech) => (
+              <span
+                key={tech}
+                className="rounded-sm border border-border-hover px-2 py-0.5 font-body text-[0.625rem] font-medium tracking-wide text-text-muted"
+              >
+                {tech}
+              </span>
+            ))}
+          </div>
+          <div className="mt-3 flex gap-4 md:justify-end">
             {project.live_url && (
               <a
                 href={project.live_url}
@@ -98,22 +100,8 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
             )}
           </div>
         </div>
-
-        <h3 className="type-project-title mt-3">{project.title}</h3>
-        <p className="type-body mt-2 max-w-2xl">{project.description}</p>
-
-        <div className="mt-4 flex flex-wrap gap-2">
-          {project.tech_stack.map((tech) => (
-            <span
-              key={tech}
-              className="rounded-sm border border-border-hover px-2.5 py-1 font-body text-[0.6875rem] font-medium tracking-wide text-text-muted transition-colors hover:border-accent hover:text-accent"
-            >
-              {tech}
-            </span>
-          ))}
-        </div>
       </div>
-    </div>
+    </article>
   )
 }
 
@@ -154,7 +142,7 @@ export default function WorkSection() {
         </h2>
       </div>
 
-      <div className="mx-auto grid max-w-[1280px] grid-cols-12 gap-x-6 gap-y-[clamp(60px,10vh,120px)]">
+      <div className="mx-auto flex max-w-[960px] flex-col gap-20">
         {projects.map((project, i) => (
           <ProjectCard key={project.id} project={project} index={i} />
         ))}
