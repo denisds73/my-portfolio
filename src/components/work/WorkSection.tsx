@@ -1,25 +1,29 @@
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState, useCallback } from 'react'
 import { useProjects } from '@/hooks/usePortfolioData'
 import type { Project } from '@/types'
 
 function ProjectCard({ project, index }: { project: Project; index: number }) {
-  const ref = useRef<HTMLDivElement>(null)
   const [visible, setVisible] = useState(false)
-  const isFeatured = index === 0
-  const isReversed = index % 2 !== 0 && !isFeatured
+  const observerRef = useRef<IntersectionObserver | null>(null)
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
+  const cardRef = useCallback((node: HTMLDivElement | null) => {
+    if (observerRef.current) observerRef.current.disconnect()
+    if (!node) return
+    observerRef.current = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) setVisible(true) },
       { threshold: 0.1 },
     )
-    if (ref.current) observer.observe(ref.current)
-    return () => observer.disconnect()
+    observerRef.current.observe(node)
   }, [])
 
+  useEffect(() => {
+    return () => { observerRef.current?.disconnect() }
+  }, [])
+
+  const isFeatured = index === 0
+  const isReversed = index % 2 !== 0 && !isFeatured
   const number = String(index + 1).padStart(2, '0')
 
-  // Grid column classes for image and text
   const imageCol = isFeatured
     ? 'col-span-12 md:[grid-column:1/9]'
     : isReversed
@@ -34,10 +38,9 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
 
   return (
     <div
-      ref={ref}
+      ref={cardRef}
       className="[grid-column:1/-1] grid grid-cols-12 items-center gap-6 md:gap-12"
     >
-      {/* Image placeholder */}
       <div
         className={`reveal group relative overflow-hidden rounded-sm bg-bg-card ${imageCol} ${visible ? 'visible' : ''}`}
         style={{ transitionDelay: '0.1s' }}
@@ -52,7 +55,6 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
         </div>
       </div>
 
-      {/* Text block */}
       <div
         className={`reveal flex flex-col justify-center ${textCol} ${visible ? 'visible' : ''} ${isFeatured ? 'md:self-end md:pb-4' : ''}`}
         style={{ transitionDelay: '0.2s' }}
@@ -102,18 +104,24 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
 }
 
 export default function WorkSection() {
-  const headerRef = useRef<HTMLDivElement>(null)
   const [headerVisible, setHeaderVisible] = useState(false)
-  const { projects } = useProjects()
+  const observerRef = useRef<IntersectionObserver | null>(null)
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
+  const headerRef = useCallback((node: HTMLDivElement | null) => {
+    if (observerRef.current) observerRef.current.disconnect()
+    if (!node) return
+    observerRef.current = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) setHeaderVisible(true) },
       { threshold: 0.2 },
     )
-    if (headerRef.current) observer.observe(headerRef.current)
-    return () => observer.disconnect()
+    observerRef.current.observe(node)
   }, [])
+
+  useEffect(() => {
+    return () => { observerRef.current?.disconnect() }
+  }, [])
+
+  const { projects } = useProjects()
 
   if (projects.length === 0) return null
 

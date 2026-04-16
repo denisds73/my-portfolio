@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState, useCallback } from 'react'
 import { useSkills } from '@/hooks/usePortfolioData'
 
 const REPEAT_COUNT = 4
@@ -13,16 +13,21 @@ function SkillItem({ name }: { name: string }) {
 }
 
 export default function SkillsMarquee() {
-  const ref = useRef<HTMLElement>(null)
   const [visible, setVisible] = useState(false)
+  const observerRef = useRef<IntersectionObserver | null>(null)
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
+  const sectionRef = useCallback((node: HTMLElement | null) => {
+    if (observerRef.current) observerRef.current.disconnect()
+    if (!node) return
+    observerRef.current = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) setVisible(true) },
       { threshold: 0.1 },
     )
-    if (ref.current) observer.observe(ref.current)
-    return () => observer.disconnect()
+    observerRef.current.observe(node)
+  }, [])
+
+  useEffect(() => {
+    return () => { observerRef.current?.disconnect() }
   }, [])
 
   const { skills } = useSkills()
@@ -32,7 +37,7 @@ export default function SkillsMarquee() {
   if (allSkills.length === 0) return null
 
   return (
-    <section ref={ref} id="skills" className="section-padding scroll-mt-20 overflow-hidden">
+    <section ref={sectionRef} id="skills" className="section-padding scroll-mt-20 overflow-hidden">
       <div className="mx-auto mb-10 max-w-[1280px] px-6">
         <p className={`reveal type-label ${visible ? 'visible' : ''}`}>Technologies</p>
       </div>
