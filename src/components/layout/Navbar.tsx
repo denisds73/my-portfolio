@@ -53,7 +53,15 @@ export default function Navbar() {
 
   const handleNavClick = useCallback((href: string) => {
     setIsOpen(false)
-    document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' })
+    const el = document.querySelector(href)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' })
+    } else {
+      // Section may not have rendered yet (async data), retry after a short delay
+      setTimeout(() => {
+        document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' })
+      }, 500)
+    }
   }, [])
 
   return (
