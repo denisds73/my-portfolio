@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Download, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
 import { useReactToPrint } from 'react-to-print'
-import { useResume } from '@/hooks/useResume'
+import { useResume, type UseResumeReturn } from '@/hooks/useResume'
 import PersonalInfoEditor from '@/components/admin/resume/PersonalInfoEditor'
 import SummaryEditor from '@/components/admin/resume/SummaryEditor'
 import ExperienceEditor from '@/components/admin/resume/ExperienceEditor'
@@ -11,6 +13,16 @@ import ProjectsEditor from '@/components/admin/resume/ProjectsEditor'
 import CertificationsEditor from '@/components/admin/resume/CertificationsEditor'
 import ResumePreview from '@/components/admin/resume/ResumePreview'
 import ResumeDocument from '@/components/admin/resume/ResumeDocument'
+import SectionNav from '@/components/admin/resume/SectionNav'
+import SectionFooter from '@/components/admin/resume/SectionFooter'
+import {
+  SECTIONS,
+  getSectionIndex,
+  isSectionComplete,
+  isValidSection,
+  type SectionKey,
+} from '@/components/admin/resume/sections'
+import type { ResumeData } from '@/types/resume'
 import { pdfFileName } from '@/lib/resumeFormat'
 import { RESUME_PRINT_PAGE_STYLE } from '@/lib/resumePrintStyle'
 
@@ -26,15 +38,113 @@ function relativeTime(from: Date | null, now: Date): string {
   return from.toLocaleString()
 }
 
+function renderActiveEditor(
+  key: SectionKey,
+  data: ResumeData,
+  setData: UseResumeReturn['setData'],
+) {
+  switch (key) {
+    case 'personal':
+      return (
+        <PersonalInfoEditor
+          value={data.personal}
+          onChange={(personal) => setData((d) => ({ ...d, personal }))}
+        />
+      )
+    case 'summary':
+      return (
+        <SummaryEditor
+          value={data.summary}
+          onChange={(summary) => setData((d) => ({ ...d, summary }))}
+        />
+      )
+    case 'skills':
+      return (
+        <SkillsEditor
+          value={data.skills}
+          onChange={(skills) => setData((d) => ({ ...d, skills }))}
+        />
+      )
+    case 'experience':
+      return (
+        <ExperienceEditor
+          value={data.experience}
+          onChange={(experience) => setData((d) => ({ ...d, experience }))}
+        />
+      )
+    case 'projects':
+      return (
+        <ProjectsEditor
+          value={data.projects}
+          onChange={(projects) => setData((d) => ({ ...d, projects }))}
+        />
+      )
+    case 'education':
+      return (
+        <EducationEditor
+          value={data.education}
+          onChange={(education) => setData((d) => ({ ...d, education }))}
+        />
+      )
+    case 'certifications':
+      return (
+        <CertificationsEditor
+          value={data.certifications}
+          onChange={(certifications) => setData((d) => ({ ...d, certifications }))}
+        />
+      )
+  }
+}
+
 export default function ResumeManager() {
   const { data, setData, status, lastSavedAt } = useResume()
   const [now, setNow] = useState(() => new Date())
   const printRef = useRef<HTMLDivElement | null>(null)
 
+  const [searchParams, setSearchParams] = useSearchParams()
+  const sectionParam = searchParams.get('section')
+  const active: SectionKey = isValidSection(sectionParam) ? sectionParam : 'personal'
+
+  const setActive = useCallback(
+    (key: SectionKey) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          next.set('section', key)
+          return next
+        },
+        { replace: false },
+      )
+    },
+    [setSearchParams],
+  )
+
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000)
     return () => clearInterval(id)
   }, [])
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey)) return
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+      const i = getSectionIndex(active)
+      const candidate = e.key === 'ArrowLeft' ? SECTIONS[i - 1] : SECTIONS[i + 1]
+      if (!candidate) return
+      e.preventDefault()
+      setActive(candidate.key)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [active, setActive])
+
+  const completion = useMemo(
+    () =>
+      Object.fromEntries(
+        SECTIONS.map((s) => [s.key, isSectionComplete(data, s.key)]),
+      ) as Record<SectionKey, boolean>,
+    [data],
+  )
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
@@ -103,42 +213,33 @@ export default function ResumeManager() {
       </header>
 
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(420px,520px)]">
-        <div className="space-y-6">
-          <PersonalInfoEditor
-            value={data.personal}
-            onChange={(personal) => setData((d) => ({ ...d, personal }))}
-          />
-          <SummaryEditor
-            value={data.summary}
-            onChange={(summary) => setData((d) => ({ ...d, summary }))}
-          />
-          <SkillsEditor
-            value={data.skills}
-            onChange={(skills) => setData((d) => ({ ...d, skills }))}
-          />
-          <ExperienceEditor
-            value={data.experience}
-            onChange={(experience) => setData((d) => ({ ...d, experience }))}
-          />
-          <ProjectsEditor
-            value={data.projects}
-            onChange={(projects) => setData((d) => ({ ...d, projects }))}
-          />
-          <EducationEditor
-            value={data.education}
-            onChange={(education) => setData((d) => ({ ...d, education }))}
-          />
-          <CertificationsEditor
-            value={data.certifications}
-            onChange={(certifications) => setData((d) => ({ ...d, certifications }))}
-          />
+        <div className="overflow-hidden rounded-xl border border-border bg-surface/30">
+          <SectionNav active={active} onSelect={setActive} completion={completion} />
+          <div
+            role="tabpanel"
+            id="resume-section-panel"
+            aria-labelledby={`resume-tab-${active}`}
+            className="min-h-[420px] p-6"
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={active}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.14, ease: 'easeOut' }}
+              >
+                {renderActiveEditor(active, data, setData)}
+              </motion.div>
+            </AnimatePresence>
+            <SectionFooter active={active} onNavigate={setActive} />
+          </div>
         </div>
         <aside className="xl:sticky xl:top-8 xl:h-[calc(100vh-4rem)] xl:overflow-y-auto">
           <ResumePreview data={data} />
         </aside>
       </div>
 
-      {/* Off-screen print target — renders at true 8.5in size */}
       <div
         aria-hidden="true"
         style={{
