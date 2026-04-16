@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Plus, Pencil, Trash2, X, Save } from 'lucide-react'
+import { Plus, Pencil, Trash2, X, Save, GripVertical } from 'lucide-react'
+import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import { Button, Input, Card } from '@/components/ui'
 import { getSupabase } from '@/lib/supabase'
 import type { Skill } from '@/types'
 
-type SkillForm = Omit<Skill, 'id' | 'created_at'>
+type SkillForm = Omit<Skill, 'id' | 'created_at' | 'sort_order'>
+
+const CATEGORIES = ['Languages', 'Frontend', 'Backend', 'Tools']
 
 export default function SkillsManager() {
   const [skills, setSkills] = useState<Skill[]>([])
@@ -24,7 +27,12 @@ export default function SkillsManager() {
     if (editing) {
       await getSupabase().from('skills').update(data).eq('id', editing)
     } else {
-      await getSupabase().from('skills').insert(data)
+      // Auto-assign sort_order: put at end of the category
+      const categorySkills = skills.filter((s) => s.category === data.category)
+      const maxOrder = categorySkills.length > 0
+        ? Math.max(...categorySkills.map((s) => s.sort_order))
+        : 0
+      await getSupabase().from('skills').insert({ ...data, sort_order: maxOrder + 1 })
     }
     setEditing(null)
     setShowForm(false)
@@ -39,7 +47,6 @@ export default function SkillsManager() {
     setValue('category', skill.category)
     setValue('proficiency', skill.proficiency)
     setValue('icon', skill.icon)
-    setValue('sort_order', skill.sort_order)
   }
 
   const handleDelete = async (id: string) => {
@@ -54,7 +61,75 @@ export default function SkillsManager() {
     reset()
   }
 
-  const categories = Array.from(new Set(skills.map((s) => s.category)))
+  const handleDragEnd = async (result: DropResult) => {
+    const { source, destination, draggableId } = result
+    if (!destination) return
+    if (source.droppableId === destination.droppableId && source.index === destination.index) return
+
+    const sourceCategory = source.droppableId
+    const destCategory = destination.droppableId
+    const draggedSkill = skills.find((s) => s.id === draggableId)
+    if (!draggedSkill) return
+
+    // Build new skills array with the change applied
+    const newSkills = [...skills]
+
+    // Remove from source
+    const sourceItems = newSkills
+      .filter((s) => s.category === sourceCategory)
+      .sort((a, b) => a.sort_order - b.sort_order)
+    sourceItems.splice(source.index, 1)
+
+    // Update the dragged skill's category
+    const updatedSkill = { ...draggedSkill, category: destCategory }
+
+    // Insert into destination
+    const destItems = sourceCategory === destCategory
+      ? sourceItems
+      : newSkills
+          .filter((s) => s.category === destCategory)
+          .sort((a, b) => a.sort_order - b.sort_order)
+    destItems.splice(destination.index, 0, updatedSkill)
+
+    // Collect all updates to batch
+    const updates: { id: string; category: string; sort_order: number }[] = []
+
+    // Re-index source category
+    if (sourceCategory !== destCategory) {
+      sourceItems.forEach((s, i) => {
+        updates.push({ id: s.id, category: sourceCategory, sort_order: i })
+      })
+    }
+
+    // Re-index destination category
+    destItems.forEach((s, i) => {
+      updates.push({ id: s.id, category: destCategory, sort_order: i })
+    })
+
+    // Optimistic update
+    const updatedSkills = skills.map((s) => {
+      const update = updates.find((u) => u.id === s.id)
+      if (update) return { ...s, category: update.category, sort_order: update.sort_order }
+      return s
+    })
+    setSkills(updatedSkills)
+
+    // Persist to Supabase
+    const sb = getSupabase()
+    await Promise.all(
+      updates.map((u) =>
+        sb.from('skills').update({ category: u.category, sort_order: u.sort_order }).eq('id', u.id)
+      )
+    )
+  }
+
+  // Include any extra categories from DB not in our defined list
+  const extraCategories = [...new Set(skills.map((s) => s.category))].filter(
+    (c) => !CATEGORIES.includes(c)
+  )
+
+  // Always show all 4 drop zones so skills can be dragged into empty categories
+  const dropCategories = [...CATEGORIES, ...extraCategories]
 
   return (
     <div>
@@ -80,17 +155,15 @@ export default function SkillsManager() {
                   className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-accent"
                 >
                   <option value="">Select category</option>
-                  <option value="Languages">Languages</option>
-                  <option value="Frontend">Frontend</option>
-                  <option value="Backend">Backend</option>
-                  <option value="Tools">Tools</option>
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
                 </select>
               </div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2">
               <Input label="Proficiency (1-100)" type="number" {...register('proficiency', { valueAsNumber: true, min: 1, max: 100 })} />
               <Input label="Icon (optional)" {...register('icon')} />
-              <Input label="Sort Order" type="number" {...register('sort_order', { valueAsNumber: true })} />
             </div>
             <div className="flex gap-3">
               <Button type="submit">
@@ -106,34 +179,72 @@ export default function SkillsManager() {
         </Card>
       )}
 
-      {categories.map((category) => (
-        <div key={category} className="mb-8">
-          <h2 className="mb-4 font-mono text-sm font-medium text-accent">{category}</h2>
-          <div className="space-y-2">
-            {skills
-              .filter((s) => s.category === category)
-              .map((skill) => (
-                <Card key={skill.id} className="flex items-center justify-between py-4">
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm font-medium text-text-primary">{skill.name}</span>
-                    <div className="hidden h-1.5 w-32 overflow-hidden rounded-full bg-border sm:block">
-                      <div className="h-full rounded-full bg-accent" style={{ width: `${skill.proficiency}%` }} />
-                    </div>
-                    <span className="font-mono text-xs text-text-muted">{skill.proficiency}%</span>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        {dropCategories.map((category) => {
+          const categorySkills = skills
+            .filter((s) => s.category === category)
+            .sort((a, b) => a.sort_order - b.sort_order)
+
+          return (
+            <div key={category} className="mb-8">
+              <h2 className="mb-4 font-mono text-sm font-medium text-accent">{category}</h2>
+              <Droppable droppableId={category}>
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={`min-h-[48px] space-y-2 rounded-lg transition-colors ${
+                      snapshot.isDraggingOver ? 'bg-accent-glow' : ''
+                    }`}
+                  >
+                    {categorySkills.map((skill, index) => (
+                      <Draggable key={skill.id} draggableId={skill.id} index={index}>
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            className={`rounded-xl border border-border bg-surface p-4 transition-shadow ${
+                              snapshot.isDragging ? 'shadow-lg shadow-accent/5 border-accent/30' : ''
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div
+                                  {...provided.dragHandleProps}
+                                  className="cursor-grab text-text-muted hover:text-text-secondary active:cursor-grabbing"
+                                >
+                                  <GripVertical className="h-4 w-4" />
+                                </div>
+                                <span className="text-sm font-medium text-text-primary">{skill.name}</span>
+                                <div className="hidden h-1.5 w-24 overflow-hidden rounded-full bg-border sm:block">
+                                  <div className="h-full rounded-full bg-accent" style={{ width: `${skill.proficiency}%` }} />
+                                </div>
+                                <span className="font-mono text-xs text-text-muted">{skill.proficiency}%</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <button onClick={() => startEdit(skill)} className="rounded-lg p-2 text-text-muted hover:bg-surface-hover hover:text-text-primary transition-colors cursor-pointer">
+                                  <Pencil className="h-4 w-4" />
+                                </button>
+                                <button onClick={() => handleDelete(skill.id)} className="rounded-lg p-2 text-text-muted hover:bg-red-500/10 hover:text-red-400 transition-colors cursor-pointer">
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                    {categorySkills.length === 0 && !snapshot.isDraggingOver && (
+                      <p className="py-4 text-center text-sm text-text-muted">Drop skills here</p>
+                    )}
                   </div>
-                  <div className="flex items-center gap-1">
-                    <button onClick={() => startEdit(skill)} className="rounded-lg p-2 text-text-muted hover:bg-surface-hover hover:text-text-primary transition-colors cursor-pointer">
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    <button onClick={() => handleDelete(skill.id)} className="rounded-lg p-2 text-text-muted hover:bg-red-500/10 hover:text-red-400 transition-colors cursor-pointer">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </Card>
-              ))}
-          </div>
-        </div>
-      ))}
+                )}
+              </Droppable>
+            </div>
+          )
+        })}
+      </DragDropContext>
 
       {skills.length === 0 && (
         <p className="py-12 text-center text-text-muted">No skills yet. Add your first one!</p>
