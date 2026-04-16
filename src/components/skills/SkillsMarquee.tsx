@@ -34,7 +34,7 @@ export default function SkillsMarquee() {
   const allSkills = skills.map((s) => s.name)
   const repeated = Array.from({ length: REPEAT_COUNT }, () => allSkills).flat()
 
-  if (allSkills.length < 4) return null
+  if (allSkills.length === 0) return null
 
   return (
     <section ref={sectionRef} id="skills" className="section-padding scroll-mt-20 overflow-hidden">
