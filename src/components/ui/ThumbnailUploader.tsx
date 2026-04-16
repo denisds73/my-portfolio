@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Upload, X, Link, Image } from 'lucide-react'
 import { getSupabase } from '@/lib/supabase'
 
@@ -49,6 +49,24 @@ export default function ThumbnailUploader({ value, onChange }: ThumbnailUploader
     const file = e.target.files?.[0]
     if (file) handleFileUpload(file)
   }
+
+  const handlePaste = (e: ClipboardEvent) => {
+    const items = e.clipboardData?.items
+    if (!items) return
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault()
+        const file = item.getAsFile()
+        if (file) handleFileUpload(file)
+        break
+      }
+    }
+  }
+
+  useEffect(() => {
+    document.addEventListener('paste', handlePaste)
+    return () => document.removeEventListener('paste', handlePaste)
+  })
 
   const clearImage = () => {
     onChange('')
@@ -127,9 +145,9 @@ export default function ThumbnailUploader({ value, onChange }: ThumbnailUploader
             <>
               <Image className="mb-2 h-6 w-6 text-text-muted" />
               <p className="text-sm text-text-secondary">
-                Drop an image here or <span className="text-accent">browse</span>
+                Drop an image, <span className="text-accent">browse</span>, or paste from clipboard
               </p>
-              <p className="mt-1 text-xs text-text-muted">PNG, JPG, WebP up to 5MB</p>
+              <p className="mt-1 text-xs text-text-muted">PNG, JPG, WebP up to 5MB — Ctrl+V to paste</p>
             </>
           )}
           <input
