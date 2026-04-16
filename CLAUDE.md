@@ -139,6 +139,14 @@ These must also be set in **Vercel project settings** → Environment Variables 
 
 **Warning**: `VITE_`-prefixed vars are exposed in the client bundle. The Resend key should NOT be used client-side — it needs a serverless function.
 
+## Git Workflow
+
+- **Never push directly to `main`.** Always create a feature/fix branch first.
+- **Never merge without approval.** Create a PR, then wait for the user to review and approve before merging. Do not auto-merge.
+- Branch naming: `feat/`, `fix/`, `chore/` prefixes (e.g., `feat/contact-email`, `fix/navbar-scroll`)
+- Commit messages: human tone, no AI co-author tags, no JIRA ticket IDs
+- Git user for this repo: `denisds73` / `flaviodenis2003@gmail.com` (local override, does not affect global config)
+
 ## Conventions
 
 - Path alias: `@/` → `src/` (configured in both `vite.config.ts` and `tsconfig.app.json`)
