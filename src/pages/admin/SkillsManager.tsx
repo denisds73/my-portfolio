@@ -73,7 +73,19 @@ export default function SkillsManager() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <Input label="Name" {...register('name', { required: true })} />
-              <Input label="Category" placeholder="Frontend, Backend, Tools..." {...register('category', { required: true })} />
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-text-secondary">Category</label>
+                <select
+                  {...register('category', { required: true })}
+                  className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-accent"
+                >
+                  <option value="">Select category</option>
+                  <option value="Languages">Languages</option>
+                  <option value="Frontend">Frontend</option>
+                  <option value="Backend">Backend</option>
+                  <option value="Tools">Tools</option>
+                </select>
+              </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
               <Input label="Proficiency (1-100)" type="number" {...register('proficiency', { valueAsNumber: true, min: 1, max: 100 })} />
