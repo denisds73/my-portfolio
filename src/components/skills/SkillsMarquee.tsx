@@ -1,18 +1,7 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { useSkills } from '@/hooks/usePortfolioData'
 
-const REPEAT_COUNT = 4
-
-function SkillItem({ name }: { name: string }) {
-  return (
-    <span className="inline-flex items-center whitespace-nowrap font-display text-[clamp(1.125rem,1.5vw,1.5rem)] italic tracking-[-0.01em] text-text-primary">
-      {name}
-      <span className="mx-8 inline-block text-accent opacity-60" aria-hidden="true">*</span>
-    </span>
-  )
-}
-
-export default function SkillsMarquee() {
+export default function SkillsSection() {
   const [visible, setVisible] = useState(false)
   const observerRef = useRef<IntersectionObserver | null>(null)
 
@@ -31,27 +20,56 @@ export default function SkillsMarquee() {
   }, [])
 
   const { skills } = useSkills()
-  const allSkills = skills.map((s) => s.name)
-  const repeated = Array.from({ length: REPEAT_COUNT }, () => allSkills).flat()
 
-  if (allSkills.length === 0) return null
+  if (skills.length === 0) return null
+
+  // Group by category, preserve sort order within each
+  const categoryOrder = ['Languages', 'Frontend', 'Backend', 'Tools']
+  const grouped = new Map<string, string[]>()
+
+  for (const skill of skills) {
+    const cat = skill.category
+    if (!grouped.has(cat)) grouped.set(cat, [])
+    grouped.get(cat)!.push(skill.name)
+  }
+
+  // Sort categories: known order first, then any extras
+  const sortedCategories = [
+    ...categoryOrder.filter((c) => grouped.has(c)),
+    ...[...grouped.keys()].filter((c) => !categoryOrder.includes(c)),
+  ]
 
   return (
-    <section ref={sectionRef} id="skills" className="section-padding scroll-mt-20 overflow-hidden">
-      <div className="mx-auto mb-10 max-w-[1280px] px-6">
-        <p className={`reveal type-label ${visible ? 'visible' : ''}`}>Technologies</p>
-      </div>
+    <section ref={sectionRef} id="skills" className="section-padding scroll-mt-20 px-6">
+      <div className="mx-auto max-w-[1280px]">
+        <p className={`reveal type-label mb-4 ${visible ? 'visible' : ''}`}>Technologies</p>
+        <h2
+          className={`reveal type-section-title mb-14 ${visible ? 'visible' : ''}`}
+          style={{ transitionDelay: '0.1s' }}
+        >
+          Tech I Work With
+        </h2>
 
-      <div
-        className={`reveal ${visible ? 'visible' : ''}`}
-        style={{ transitionDelay: '0.15s' }}
-      >
-        <div className="overflow-hidden">
-          <div className="marquee-track marquee-forward">
-            {repeated.map((name, i) => (
-              <SkillItem key={`${name}-${i}`} name={name} />
-            ))}
-          </div>
+        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
+          {sortedCategories.map((category, catIdx) => (
+            <div
+              key={category}
+              className={`reveal ${visible ? 'visible' : ''}`}
+              style={{ transitionDelay: `${0.15 + catIdx * 0.08}s` }}
+            >
+              <p className="type-label-accent mb-5">{category}</p>
+              <div className="flex flex-wrap gap-2">
+                {grouped.get(category)!.map((name) => (
+                  <span
+                    key={name}
+                    className="rounded-sm border border-border-hover px-3 py-1.5 font-body text-[0.8125rem] tracking-wide text-text-primary transition-colors hover:border-accent hover:text-accent"
+                  >
+                    {name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>

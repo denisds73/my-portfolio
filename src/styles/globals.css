@@ -254,33 +254,7 @@ body {
   50% { opacity: 1; transform: translateY(8px); }
 }
 
-/* ── Skills Marquee ────────────────────────────────── */
-
-.marquee-track {
-  display: flex;
-  width: max-content;
-  gap: 0;
-}
-
-.marquee-forward {
-  animation: marquee-scroll 45s linear infinite;
-}
-
-.marquee-reverse {
-  animation: marquee-scroll 45s linear infinite reverse;
-}
-
-.marquee-track:hover {
-  animation-play-state: paused;
-  cursor: default;
-  opacity: 0.85;
-  transition: opacity 0.3s;
-}
-
-@keyframes marquee-scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-25%); }
-}
+/* ── (marquee removed — static skills grid) ───────── */
 
 /* ── Projects Grid ─────────────────────────────────── */
 
