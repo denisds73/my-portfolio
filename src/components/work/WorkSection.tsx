@@ -46,11 +46,20 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
         style={{ transitionDelay: '0.1s' }}
       >
         <div className={`${isFeatured ? 'aspect-[16/9]' : 'aspect-[4/3]'} relative`}>
-          <div className="absolute inset-0 flex items-center justify-center p-8">
-            <span className="select-none font-display text-[clamp(2rem,4vw,4rem)] font-bold leading-none tracking-tight text-text-primary opacity-[0.04]">
-              {project.title}
-            </span>
-          </div>
+          {project.thumbnail_url ? (
+            <img
+              src={project.thumbnail_url}
+              alt={project.title}
+              loading="lazy"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center p-8">
+              <span className="select-none font-display text-[clamp(2rem,4vw,4rem)] font-bold leading-none tracking-tight text-text-primary opacity-[0.04]">
+                {project.title}
+              </span>
+            </div>
+          )}
           <div className="absolute inset-0 bg-accent-glow opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
         </div>
       </div>
