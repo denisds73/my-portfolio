@@ -2,17 +2,17 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Plus, Pencil, Trash2, X, Save } from 'lucide-react'
 import { Button, Input, Textarea, Card } from '@/components/ui'
-import ThumbnailUploader from '@/components/ui/ThumbnailUploader'
+import MultiImageUploader from '@/components/ui/MultiImageUploader'
 import { getSupabase } from '@/lib/supabase'
 import type { Project } from '@/types'
 
-type ProjectForm = Omit<Project, 'id' | 'created_at' | 'updated_at'>
+type ProjectForm = Omit<Project, 'id' | 'created_at' | 'updated_at' | 'images'>
 
 export default function ProjectsManager() {
   const [projects, setProjects] = useState<Project[]>([])
   const [editing, setEditing] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
-  const [thumbnailUrl, setThumbnailUrl] = useState('')
+  const [images, setImages] = useState<string[]>([])
   const { register, handleSubmit, reset, setValue } = useForm<ProjectForm>()
 
   const fetchProjects = async () => {
@@ -33,7 +33,13 @@ export default function ProjectsManager() {
         ? Math.max(...projects.map((p) => p.sort_order)) + 1
         : 1
 
-    const payload = { ...data, tech_stack: techStack, thumbnail_url: thumbnailUrl, sort_order: sortOrder }
+    const payload = {
+      ...data,
+      tech_stack: techStack,
+      thumbnail_url: images[0] || '',
+      images,
+      sort_order: sortOrder,
+    }
 
     if (editing) {
       await getSupabase().from('projects').update(payload).eq('id', editing)
@@ -48,7 +54,7 @@ export default function ProjectsManager() {
 
   const resetForm = () => {
     reset()
-    setThumbnailUrl('')
+    setImages([])
   }
 
   const startEdit = (project: Project) => {
@@ -62,7 +68,13 @@ export default function ProjectsManager() {
     setValue('tech_stack', project.tech_stack as unknown as string[])
     setValue('featured', project.featured)
     setValue('sort_order', project.sort_order)
-    setThumbnailUrl(project.thumbnail_url)
+    // Load images — fall back to thumbnail_url for old projects
+    const projectImages = project.images?.length > 0
+      ? project.images
+      : project.thumbnail_url
+        ? [project.thumbnail_url]
+        : []
+    setImages(projectImages)
   }
 
   const handleDelete = async (id: string) => {
@@ -93,7 +105,7 @@ export default function ProjectsManager() {
         <Card hover={false} className="mb-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <Input label="Title" {...register('title', { required: true })} />
-            <ThumbnailUploader value={thumbnailUrl} onChange={setThumbnailUrl} />
+            <MultiImageUploader images={images} onChange={setImages} />
             <Textarea label="Description" rows={2} {...register('description', { required: true })} />
             <Textarea label="Long Description" rows={3} {...register('long_description')} />
             <div className="grid gap-4 sm:grid-cols-2">
@@ -120,36 +132,43 @@ export default function ProjectsManager() {
       )}
 
       <div className="space-y-3">
-        {projects.map((project) => (
-          <Card key={project.id} className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              {project.thumbnail_url && (
-                <img
-                  src={project.thumbnail_url}
-                  alt={project.title}
-                  className="h-12 w-20 rounded object-cover"
-                />
-              )}
-              <div>
-                <h3 className="font-medium text-text-primary">{project.title}</h3>
-                <p className="mt-0.5 text-sm text-text-muted">{project.tech_stack.join(', ')}</p>
+        {projects.map((project) => {
+          const coverImage = project.images?.[0] || project.thumbnail_url
+          const imageCount = project.images?.length || (project.thumbnail_url ? 1 : 0)
+          return (
+            <Card key={project.id} className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                {coverImage && (
+                  <div className="relative h-12 w-20 shrink-0 overflow-hidden rounded">
+                    <img src={coverImage} alt={project.title} className="h-full w-full object-cover" />
+                    {imageCount > 1 && (
+                      <span className="absolute bottom-0.5 right-0.5 rounded bg-bg/70 px-1 text-[9px] tabular-nums text-text-muted backdrop-blur-sm">
+                        +{imageCount - 1}
+                      </span>
+                    )}
+                  </div>
+                )}
+                <div>
+                  <h3 className="font-medium text-text-primary">{project.title}</h3>
+                  <p className="mt-0.5 text-sm text-text-muted">{project.tech_stack.join(', ')}</p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {project.featured && (
-                <span className="rounded bg-accent-glow px-2 py-0.5 font-mono text-xs text-accent">
-                  Featured
-                </span>
-              )}
-              <button onClick={() => startEdit(project)} className="rounded-lg p-2 text-text-muted hover:bg-surface-hover hover:text-text-primary transition-colors cursor-pointer">
-                <Pencil className="h-4 w-4" />
-              </button>
-              <button onClick={() => handleDelete(project.id)} className="rounded-lg p-2 text-text-muted hover:bg-red-500/10 hover:text-red-400 transition-colors cursor-pointer">
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
-          </Card>
-        ))}
+              <div className="flex items-center gap-2">
+                {project.featured && (
+                  <span className="rounded bg-accent-glow px-2 py-0.5 font-mono text-xs text-accent">
+                    Featured
+                  </span>
+                )}
+                <button onClick={() => startEdit(project)} className="rounded-lg p-2 text-text-muted hover:bg-surface-hover hover:text-text-primary transition-colors cursor-pointer">
+                  <Pencil className="h-4 w-4" />
+                </button>
+                <button onClick={() => handleDelete(project.id)} className="rounded-lg p-2 text-text-muted hover:bg-red-500/10 hover:text-red-400 transition-colors cursor-pointer">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </Card>
+          )
+        })}
         {projects.length === 0 && (
           <p className="py-12 text-center text-text-muted">No projects yet. Add your first one!</p>
         )}

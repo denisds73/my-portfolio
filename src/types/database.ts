@@ -33,6 +33,7 @@ export interface Project {
   description: string
   long_description: string | null
   thumbnail_url: string
+  images: string[]
   live_url: string | null
   github_url: string | null
   tech_stack: string[]
