@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { useProjects } from '@/hooks/usePortfolioData'
+import ProjectCarousel from './ProjectCarousel'
 import type { Project } from '@/types'
 
 function ProjectCard({ project, index }: { project: Project; index: number }) {
@@ -24,6 +25,13 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
   const isReversed = index % 2 !== 0 && !isFeatured
   const number = String(index + 1).padStart(2, '0')
 
+  // Merge images array with thumbnail_url fallback
+  const allImages = project.images?.length > 0
+    ? project.images
+    : project.thumbnail_url
+      ? [project.thumbnail_url]
+      : []
+
   const imageCol = isFeatured
     ? 'col-span-12 md:[grid-column:1/9]'
     : isReversed
@@ -45,23 +53,22 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
         className={`reveal group relative overflow-hidden rounded-sm bg-bg-card ${imageCol} ${visible ? 'visible' : ''}`}
         style={{ transitionDelay: '0.1s' }}
       >
-        <div className={`${isFeatured ? 'aspect-[16/9]' : 'aspect-[4/3]'} relative`}>
-          {project.thumbnail_url ? (
-            <img
-              src={project.thumbnail_url}
-              alt={project.title}
-              loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-            />
-          ) : (
+        {allImages.length > 0 ? (
+          <ProjectCarousel
+            images={allImages}
+            title={project.title}
+            aspectRatio={isFeatured ? 'aspect-[16/9]' : 'aspect-[4/3]'}
+          />
+        ) : (
+          <div className={`${isFeatured ? 'aspect-[16/9]' : 'aspect-[4/3]'} relative`}>
             <div className="absolute inset-0 flex items-center justify-center p-8">
               <span className="select-none font-display text-[clamp(2rem,4vw,4rem)] font-bold leading-none tracking-tight text-text-primary opacity-[0.04]">
                 {project.title}
               </span>
             </div>
-          )}
-          <div className="absolute inset-0 bg-accent-glow opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-        </div>
+          </div>
+        )}
+        <div className="absolute inset-0 pointer-events-none bg-accent-glow opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
       </div>
 
       <div
