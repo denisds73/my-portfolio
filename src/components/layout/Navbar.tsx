@@ -20,45 +20,37 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Active section tracking — re-observes when DOM changes (async sections)
+  // Active section tracking — scroll-position based (reliable with async sections)
   useEffect(() => {
-    const sectionObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const id = entry.target.id
-            if (id === 'skills' || id === 'experience') {
-              setActiveSection('#work')
-            } else {
-              setActiveSection(`#${id}`)
-            }
-          }
-        })
-      },
-      { rootMargin: '-40% 0px -55% 0px' },
-    )
+    const mapToNav = (id: string): string => {
+      if (id === 'skills' || id === 'experience') return '#work'
+      return `#${id}`
+    }
 
-    const observeSections = () => {
-      sectionObserver.disconnect()
-      ALL_SECTION_IDS.forEach((id) => {
+    const updateActive = () => {
+      const threshold = window.innerHeight * 0.4
+      let current = ''
+
+      for (const id of ALL_SECTION_IDS) {
         const el = document.getElementById(id)
-        if (el) sectionObserver.observe(el)
-      })
+        if (!el) continue
+        const rect = el.getBoundingClientRect()
+        if (rect.top <= threshold) {
+          current = id
+        }
+      }
+
+      if (current) {
+        setActiveSection(mapToNav(current))
+      } else {
+        setActiveSection('')
+      }
     }
 
-    // Initial observe
-    observeSections()
+    window.addEventListener('scroll', updateActive, { passive: true })
+    updateActive()
 
-    // Re-observe when DOM changes (sections rendering after async data loads)
-    const mutationObserver = new MutationObserver(() => {
-      observeSections()
-    })
-    mutationObserver.observe(document.body, { childList: true, subtree: true })
-
-    return () => {
-      sectionObserver.disconnect()
-      mutationObserver.disconnect()
-    }
+    return () => window.removeEventListener('scroll', updateActive)
   }, [])
 
   // Close mobile menu on Escape
