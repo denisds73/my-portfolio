@@ -3,10 +3,9 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 interface ProjectCarouselProps {
   images: string[]
   title: string
-  aspectRatio?: string
 }
 
-export default function ProjectCarousel({ images, title, aspectRatio = 'aspect-[4/3]' }: ProjectCarouselProps) {
+export default function ProjectCarousel({ images, title }: ProjectCarouselProps) {
   const [current, setCurrent] = useState(0)
   const [isHovering, setIsHovering] = useState(false)
   const touchStart = useRef<number | null>(null)
@@ -18,7 +17,6 @@ export default function ProjectCarousel({ images, title, aspectRatio = 'aspect-[
     setCurrent((index + total) % total)
   }, [total])
 
-  // Keyboard navigation when focused
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -31,15 +29,22 @@ export default function ProjectCarousel({ images, title, aspectRatio = 'aspect-[
   }, [current, goTo])
 
   if (total === 0) return null
+
+  const renderImage = (src: string, i: number, style?: React.CSSProperties) => (
+    <img
+      key={src}
+      src={src}
+      alt={`${title} — ${i + 1}${total > 1 ? ` of ${total}` : ''}`}
+      loading={i === 0 ? 'eager' : 'lazy'}
+      className="h-full w-full object-contain transition-opacity duration-700 ease-in-out"
+      style={style}
+    />
+  )
+
   if (total === 1) {
     return (
-      <div className={`${aspectRatio} relative overflow-hidden`}>
-        <img
-          src={images[0]}
-          alt={title}
-          loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-        />
+      <div className="relative bg-bg-card">
+        {renderImage(images[0], 0)}
       </div>
     )
   }
@@ -47,16 +52,14 @@ export default function ProjectCarousel({ images, title, aspectRatio = 'aspect-[
   return (
     <div
       ref={containerRef}
-      className={`${aspectRatio} relative overflow-hidden`}
+      className="relative bg-bg-card"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       onTouchStart={(e) => { touchStart.current = e.touches[0].clientX }}
       onTouchEnd={(e) => {
         if (touchStart.current === null) return
         const diff = touchStart.current - e.changedTouches[0].clientX
-        if (Math.abs(diff) > 50) {
-          goTo(diff > 0 ? current + 1 : current - 1)
-        }
+        if (Math.abs(diff) > 50) goTo(diff > 0 ? current + 1 : current - 1)
         touchStart.current = null
       }}
       tabIndex={0}
@@ -64,19 +67,24 @@ export default function ProjectCarousel({ images, title, aspectRatio = 'aspect-[
       aria-label={`${title} images, ${current + 1} of ${total}`}
       aria-roledescription="carousel"
     >
-      {/* Images — crossfade */}
-      {images.map((src, i) => (
-        <img
-          key={src}
-          src={src}
-          alt={`${title} — ${i + 1} of ${total}`}
-          loading={i === 0 ? 'eager' : 'lazy'}
-          className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out"
-          style={{ opacity: i === current ? 1 : 0 }}
-        />
-      ))}
+      {/* Stacked images — crossfade, natural height from first image */}
+      <div className="relative">
+        {/* First image sets the height */}
+        <div className="invisible">{renderImage(images[0], 0)}</div>
 
-      {/* Nav arrows — appear on hover */}
+        {/* All images layered absolutely */}
+        {images.map((src, i) => (
+          <div
+            key={src}
+            className="absolute inset-0 flex items-center justify-center transition-opacity duration-700 ease-in-out"
+            style={{ opacity: i === current ? 1 : 0 }}
+          >
+            {renderImage(src, i)}
+          </div>
+        ))}
+      </div>
+
+      {/* Nav arrows */}
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); goTo(current - 1) }}
@@ -102,7 +110,7 @@ export default function ProjectCarousel({ images, title, aspectRatio = 'aspect-[
         </svg>
       </button>
 
-      {/* Progress bar — thin line at bottom */}
+      {/* Progress segments */}
       <div className={`absolute bottom-0 left-0 right-0 flex h-[2px] transition-opacity duration-300 ${isHovering ? 'opacity-100' : 'opacity-50'}`}>
         {images.map((_, i) => (
           <button
@@ -120,7 +128,7 @@ export default function ProjectCarousel({ images, title, aspectRatio = 'aspect-[
         ))}
       </div>
 
-      {/* Counter — top right */}
+      {/* Counter */}
       <span className={`absolute right-3 top-3 rounded bg-bg/60 px-2 py-0.5 font-body text-[10px] tabular-nums tracking-wider text-text-muted backdrop-blur-sm transition-opacity duration-300 ${isHovering ? 'opacity-100' : 'opacity-0'}`}>
         {current + 1} / {total}
       </span>

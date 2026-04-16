@@ -12,7 +12,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
     if (!node) return
     observerRef.current = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) setVisible(true) },
-      { threshold: 0.1 },
+      { threshold: 0.05 },
     )
     observerRef.current.observe(node)
   }, [])
@@ -22,97 +22,95 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
   }, [])
 
   const isFeatured = index === 0
-  const isReversed = index % 2 !== 0 && !isFeatured
+  const isEven = index % 2 === 0
   const number = String(index + 1).padStart(2, '0')
 
-  // Merge images array with thumbnail_url fallback
   const allImages = project.images?.length > 0
     ? project.images
     : project.thumbnail_url
       ? [project.thumbnail_url]
       : []
 
-  const imageCol = isFeatured
-    ? 'col-span-12 md:[grid-column:1/9]'
-    : isReversed
-      ? 'col-span-12 md:[grid-column:6/13]'
-      : 'col-span-12 md:[grid-column:1/8]'
-
-  const textCol = isFeatured
-    ? 'col-span-12 md:[grid-column:9/13]'
-    : isReversed
-      ? 'col-span-12 md:[grid-column:1/6]'
-      : 'col-span-12 md:[grid-column:8/13]'
+  // Staggered widths: featured = full, others alternate wide-left / wide-right
+  const cardWidth = isFeatured
+    ? 'md:col-span-10 md:col-start-2'
+    : isEven
+      ? 'md:col-span-8 md:col-start-1'
+      : 'md:col-span-8 md:col-start-5'
 
   return (
     <div
       ref={cardRef}
-      className="[grid-column:1/-1] grid grid-cols-12 items-center gap-6 md:gap-12"
+      className={`col-span-12 ${cardWidth}`}
     >
+      {/* Image — full width, natural proportions, no cropping */}
       <div
-        className={`reveal group relative overflow-hidden rounded-sm bg-bg-card ${imageCol} ${visible ? 'visible' : ''}`}
+        className={`reveal overflow-hidden rounded-sm border border-border bg-bg-card ${visible ? 'visible' : ''}`}
         style={{ transitionDelay: '0.1s' }}
       >
         {allImages.length > 0 ? (
-          <ProjectCarousel
-            images={allImages}
-            title={project.title}
-            aspectRatio={isFeatured ? 'aspect-[16/9]' : 'aspect-[4/3]'}
-          />
+          <ProjectCarousel images={allImages} title={project.title} />
         ) : (
-          <div className={`${isFeatured ? 'aspect-[16/9]' : 'aspect-[4/3]'} relative`}>
-            <div className="absolute inset-0 flex items-center justify-center p-8">
-              <span className="select-none font-display text-[clamp(2rem,4vw,4rem)] font-bold leading-none tracking-tight text-text-primary opacity-[0.04]">
-                {project.title}
-              </span>
-            </div>
+          <div className="flex aspect-[16/9] items-center justify-center">
+            <span className="select-none font-display text-[clamp(2rem,4vw,4rem)] font-bold leading-none tracking-tight text-text-primary opacity-[0.04]">
+              {project.title}
+            </span>
           </div>
         )}
-        <div className="absolute inset-0 pointer-events-none bg-accent-glow opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
       </div>
 
+      {/* Project info — directly below the image */}
       <div
-        className={`reveal flex flex-col justify-center ${textCol} ${visible ? 'visible' : ''} ${isFeatured ? 'md:self-end md:pb-4' : ''}`}
+        className={`reveal mt-6 ${visible ? 'visible' : ''}`}
         style={{ transitionDelay: '0.2s' }}
       >
-        <p className="type-label mb-3 text-text-muted">
-          {number}{isFeatured ? ' — Featured' : ''}
-        </p>
-        <h3 className="type-project-title">{project.title}</h3>
-        <p className="type-body mt-3">{project.description}</p>
-        <div className="mt-5 flex flex-wrap gap-2">
+        <div className="flex items-baseline justify-between gap-4">
+          <div className="flex items-baseline gap-3">
+            <span className="type-label text-text-muted">{number}</span>
+            {isFeatured && (
+              <span className="rounded-sm bg-accent-glow px-2 py-0.5 font-body text-[0.6rem] font-medium uppercase tracking-[0.1em] text-accent">
+                Featured
+              </span>
+            )}
+          </div>
+          <div className="flex gap-4">
+            {project.live_url && (
+              <a
+                href={project.live_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-body text-sm text-accent transition-opacity hover:opacity-70"
+                aria-label={`View ${project.title} live (opens in new tab)`}
+              >
+                Live <span aria-hidden="true">→</span>
+              </a>
+            )}
+            {project.github_url && (
+              <a
+                href={project.github_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-body text-sm text-text-muted transition-colors hover:text-text-primary"
+                aria-label={`View source for ${project.title} (opens in new tab)`}
+              >
+                Source
+              </a>
+            )}
+          </div>
+        </div>
+
+        <h3 className="type-project-title mt-3">{project.title}</h3>
+        <p className="type-body mt-2 max-w-2xl">{project.description}</p>
+
+        <div className="mt-4 flex flex-wrap gap-2">
           {project.tech_stack.map((tech) => (
             <span
               key={tech}
-              className="rounded-sm border border-border-hover px-2.5 py-1 font-body text-[0.6875rem] font-medium tracking-wide text-text-muted"
+              className="rounded-sm border border-border-hover px-2.5 py-1 font-body text-[0.6875rem] font-medium tracking-wide text-text-muted transition-colors hover:border-accent hover:text-accent"
             >
               {tech}
             </span>
           ))}
-        </div>
-        <div className="mt-5 flex gap-4">
-          {project.live_url && (
-            <a
-              href={project.live_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-body text-sm text-accent transition-opacity hover:opacity-70"
-              aria-label={`View ${project.title} live (opens in new tab)`}
-            >
-              View Live <span aria-hidden="true">→</span>
-            </a>
-          )}
-          {project.github_url && (
-            <a
-              href={project.github_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-body text-sm text-text-muted transition-colors hover:text-text-primary"
-              aria-label={`View source for ${project.title} (opens in new tab)`}
-            >
-              Source
-            </a>
-          )}
         </div>
       </div>
     </div>
@@ -156,7 +154,7 @@ export default function WorkSection() {
         </h2>
       </div>
 
-      <div className="projects-grid mx-auto max-w-[1280px]">
+      <div className="mx-auto grid max-w-[1280px] grid-cols-12 gap-x-6 gap-y-[clamp(60px,10vh,120px)]">
         {projects.map((project, i) => (
           <ProjectCard key={project.id} project={project} index={i} />
         ))}
