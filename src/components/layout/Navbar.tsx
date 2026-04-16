@@ -7,6 +7,8 @@ const navLinks = [
   { label: 'Contact', href: '#contact' },
 ]
 
+const ALL_SECTION_IDS = ['about', 'work', 'skills', 'experience', 'contact']
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -18,27 +20,45 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  // Active section tracking — re-observes when DOM changes (async sections)
   useEffect(() => {
-    const sectionIds = ['#about', '#work', '#skills', '#experience', '#contact']
-    const sections = sectionIds.map((id) => document.querySelector(id))
-    const observer = new IntersectionObserver(
+    const sectionObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const id = `#${entry.target.id}`
-            // Map skills/experience to nearest nav link
-            if (id === '#skills' || id === '#experience') {
+            const id = entry.target.id
+            if (id === 'skills' || id === 'experience') {
               setActiveSection('#work')
             } else {
-              setActiveSection(id)
+              setActiveSection(`#${id}`)
             }
           }
         })
       },
       { rootMargin: '-40% 0px -55% 0px' },
     )
-    sections.forEach((s) => s && observer.observe(s))
-    return () => observer.disconnect()
+
+    const observeSections = () => {
+      sectionObserver.disconnect()
+      ALL_SECTION_IDS.forEach((id) => {
+        const el = document.getElementById(id)
+        if (el) sectionObserver.observe(el)
+      })
+    }
+
+    // Initial observe
+    observeSections()
+
+    // Re-observe when DOM changes (sections rendering after async data loads)
+    const mutationObserver = new MutationObserver(() => {
+      observeSections()
+    })
+    mutationObserver.observe(document.body, { childList: true, subtree: true })
+
+    return () => {
+      sectionObserver.disconnect()
+      mutationObserver.disconnect()
+    }
   }, [])
 
   // Close mobile menu on Escape
@@ -53,14 +73,22 @@ export default function Navbar() {
 
   const handleNavClick = useCallback((href: string) => {
     setIsOpen(false)
-    const el = document.querySelector(href)
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' })
-    } else {
-      // Section may not have rendered yet (async data), retry after a short delay
-      setTimeout(() => {
-        document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' })
-      }, 500)
+    const tryScroll = () => {
+      const el = document.querySelector(href)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' })
+        return true
+      }
+      return false
+    }
+
+    if (!tryScroll()) {
+      // Section may not have rendered yet, poll briefly
+      let attempts = 0
+      const interval = setInterval(() => {
+        attempts++
+        if (tryScroll() || attempts >= 5) clearInterval(interval)
+      }, 300)
     }
   }, [])
 
