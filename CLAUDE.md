@@ -141,11 +141,14 @@ These must also be set in **Vercel project settings** → Environment Variables 
 
 ## Git Workflow
 
-- **Never push directly to `main`.** Always create a feature/fix branch first.
-- **Never merge without approval.** Create a PR, then wait for the user to review and approve before merging. Do not auto-merge.
-- Branch naming: `feat/`, `fix/`, `chore/` prefixes (e.g., `feat/contact-email`, `fix/navbar-scroll`)
-- Commit messages: human tone, no AI co-author tags, no JIRA ticket IDs
-- Git user for this repo: `denisds73` / `flaviodenis2003@gmail.com` (local override, does not affect global config)
+**This is a hard rule. Read before every commit.**
+
+1. **Never push directly to `main`.** Always create a feature/fix/chore branch first (`feat/`, `fix/`, `chore/` prefixes — e.g., `feat/contact-email`, `fix/navbar-scroll`).
+2. **Never merge a PR yourself — even if the user said "merge and deploy" earlier in the conversation.** Phrases like "merge and deploy", "ship it", or "deploy" authorize the *intent*, not the action. After opening the PR, **stop and wait** for the user to explicitly approve that specific PR ("merge PR #N", "looks good, merge", "approved"). If they haven't said that about the PR in front of you, do not run `gh pr merge`.
+3. **The flow is always**: branch → commit → push → open PR → **wait** → user approves the specific PR → then merge.
+4. When in doubt, ask. It is always better to pause and confirm than to auto-merge.
+5. Commit messages: human tone, no AI co-author tags, no JIRA ticket IDs.
+6. Git user for this repo: `denisds73` / `flaviodenis2003@gmail.com` (local override, does not affect global config).
 
 ## Conventions
 
