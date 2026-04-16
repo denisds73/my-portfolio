@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Plus, Pencil, Trash2, X, Save } from 'lucide-react'
 import { Button, Input, Textarea, Card } from '@/components/ui'
+import MonthPicker from '@/components/ui/MonthPicker'
 import { getSupabase } from '@/lib/supabase'
 import type { Experience } from '@/types'
 
@@ -11,6 +12,9 @@ export default function ExperienceManager() {
   const [items, setItems] = useState<Experience[]>([])
   const [editing, setEditing] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
+  const [startDate, setStartDate] = useState<string | null>(null)
+  const [endDate, setEndDate] = useState<string | null>(null)
+  const [isPresent, setIsPresent] = useState(false)
   const { register, handleSubmit, reset, setValue } = useForm<ExperienceForm>()
 
   const fetchItems = async () => {
@@ -21,9 +25,20 @@ export default function ExperienceManager() {
   useEffect(() => { fetchItems() }, [])
 
   const onSubmit = async (data: ExperienceForm) => {
+    // Auto-assign sort_order for new entries
+    const sortOrder = editing
+      ? data.sort_order
+      : items.length > 0
+        ? Math.max(...items.map((i) => i.sort_order)) + 1
+        : 1
+
     const payload = {
-      ...data,
-      end_date: data.end_date || null,
+      company: data.company,
+      role: data.role,
+      description: data.description,
+      start_date: startDate,
+      end_date: isPresent ? null : endDate,
+      sort_order: sortOrder,
     }
 
     if (editing) {
@@ -33,8 +48,15 @@ export default function ExperienceManager() {
     }
     setEditing(null)
     setShowForm(false)
-    reset()
+    resetForm()
     fetchItems()
+  }
+
+  const resetForm = () => {
+    reset()
+    setStartDate(null)
+    setEndDate(null)
+    setIsPresent(false)
   }
 
   const startEdit = (item: Experience) => {
@@ -42,10 +64,16 @@ export default function ExperienceManager() {
     setShowForm(true)
     setValue('company', item.company)
     setValue('role', item.role)
-    setValue('start_date', item.start_date)
-    setValue('end_date', item.end_date)
     setValue('description', item.description)
     setValue('sort_order', item.sort_order)
+    setStartDate(item.start_date)
+    if (item.end_date) {
+      setEndDate(item.end_date)
+      setIsPresent(false)
+    } else {
+      setEndDate(null)
+      setIsPresent(true)
+    }
   }
 
   const handleDelete = async (id: string) => {
@@ -57,11 +85,15 @@ export default function ExperienceManager() {
   const cancelForm = () => {
     setEditing(null)
     setShowForm(false)
-    reset()
+    resetForm()
   }
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    const [year, month] = dateStr.split('-')
+    return new Date(Number(year), Number(month) - 1).toLocaleDateString('en-US', {
+      month: 'short',
+      year: 'numeric',
+    })
   }
 
   return (
@@ -69,7 +101,7 @@ export default function ExperienceManager() {
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-text-primary">Experience</h1>
         {!showForm && (
-          <Button onClick={() => { setShowForm(true); setEditing(null); reset() }}>
+          <Button onClick={() => { setShowForm(true); setEditing(null); resetForm() }}>
             <Plus className="mr-2 h-4 w-4" />
             Add Experience
           </Button>
@@ -83,14 +115,24 @@ export default function ExperienceManager() {
               <Input label="Company" {...register('company', { required: true })} />
               <Input label="Role" {...register('role', { required: true })} />
             </div>
-            <div className="grid gap-4 sm:grid-cols-3">
-              <Input label="Start Date" type="date" {...register('start_date', { required: true })} />
-              <Input label="End Date (blank = present)" type="date" {...register('end_date')} />
-              <Input label="Sort Order" type="number" {...register('sort_order', { valueAsNumber: true })} />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <MonthPicker
+                label="Start Date"
+                value={startDate}
+                onChange={setStartDate}
+              />
+              <MonthPicker
+                label="End Date"
+                value={endDate}
+                onChange={setEndDate}
+                allowPresent
+                isPresent={isPresent}
+                onPresentChange={setIsPresent}
+              />
             </div>
             <Textarea label="Description" rows={3} {...register('description', { required: true })} />
             <div className="flex gap-3">
-              <Button type="submit">
+              <Button type="submit" disabled={!startDate}>
                 <Save className="mr-2 h-4 w-4" />
                 {editing ? 'Update' : 'Create'}
               </Button>
@@ -110,7 +152,9 @@ export default function ExperienceManager() {
               <h3 className="font-medium text-text-primary">{item.role}</h3>
               <p className="mt-0.5 text-sm text-accent">{item.company}</p>
               <p className="mt-0.5 text-xs text-text-muted">
-                {formatDate(item.start_date)} — {item.end_date ? formatDate(item.end_date) : 'Present'}
+                {formatDate(item.start_date)} — {item.end_date ? formatDate(item.end_date) : (
+                  <span className="text-accent">Present</span>
+                )}
               </p>
             </div>
             <div className="flex items-center gap-1">
