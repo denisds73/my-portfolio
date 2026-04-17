@@ -256,9 +256,9 @@ export default function Contact() {
                     </label>
                     <textarea
                       id="contact-message"
-                      rows={5}
+                      rows={4}
                       placeholder="A few lines about the role, team, project, or question — whatever context helps me write a useful reply."
-                      className={`field-input resize-none ${errors.message ? 'field-error' : ''}`}
+                      className={`field-textarea ${errors.message ? 'field-error' : ''}`}
                       aria-invalid={errors.message ? 'true' : 'false'}
                       {...register('message', {
                         required: 'A short message helps me reply well.',
@@ -289,10 +289,17 @@ export default function Contact() {
                   <button
                     type="submit"
                     disabled={status === 'sending'}
-                    className="inline-flex cursor-pointer items-center gap-2 font-body text-sm uppercase tracking-[0.08em] text-accent transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="group inline-flex cursor-pointer items-center gap-3 rounded-md bg-accent px-6 py-3 font-body text-[0.78rem] font-semibold uppercase tracking-[0.14em] text-background shadow-[0_10px_30px_-12px_rgba(255,90,54,0.6)] transition-all hover:bg-accent-hover hover:shadow-[0_14px_34px_-12px_rgba(255,90,54,0.7)] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
                   >
                     {status === 'sending' ? 'Sending…' : 'Send message'}
-                    {status !== 'sending' && <span aria-hidden="true">→</span>}
+                    {status !== 'sending' && (
+                      <span
+                        aria-hidden="true"
+                        className="transition-transform duration-200 group-hover:translate-x-0.5"
+                      >
+                        →
+                      </span>
+                    )}
                   </button>
                 </form>
               )}
