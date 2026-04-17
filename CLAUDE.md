@@ -132,12 +132,16 @@ Required in `.env.local` (gitignored):
 ```
 VITE_SUPABASE_URL=https://xxx.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJ...
-VITE_RESEND_API_KEY=re_...
+
+# Server-only (Vercel serverless function at /api/contact)
+RESEND_API_KEY=re_...
+CONTACT_TO_EMAIL=flaviodenis2003@gmail.com
+CONTACT_FROM_EMAIL="Portfolio <onboarding@resend.dev>"   # optional; default verified Resend sender
 ```
 
 These must also be set in **Vercel project settings** → Environment Variables for production builds.
 
-**Warning**: `VITE_`-prefixed vars are exposed in the client bundle. The Resend key should NOT be used client-side — it needs a serverless function.
+**Warning**: `VITE_`-prefixed vars are exposed in the client bundle. The Resend key is **server-only** (no `VITE_` prefix) and is read by `api/contact.ts`.
 
 ## Git Workflow
 
@@ -163,7 +167,7 @@ These must also be set in **Vercel project settings** → Environment Variables 
 
 ## Known TODOs
 
-- Contact form email integration (Resend API key exists but needs a Vercel serverless function — NOT safe client-side)
+- ~~Contact form email integration~~ **done** — `api/contact.ts` Vercel serverless function sends via Resend; form posts to `/api/contact`
 - Replace placeholder social links in `Contact.tsx` with real profile URLs
 - Replace `public/resume.pdf` with actual resume
 - Old unused components can be cleaned up: `ProjectGrid.tsx`, `ProjectCard.tsx`, `SkillsSection.tsx`, `Timeline.tsx`, `ContactForm.tsx`, `Footer.tsx`, `placeholder.ts`
