@@ -15,6 +15,7 @@ import ResumePreview from '@/components/admin/resume/ResumePreview'
 import ResumeDocument from '@/components/admin/resume/ResumeDocument'
 import SectionNav from '@/components/admin/resume/SectionNav'
 import SectionFooter from '@/components/admin/resume/SectionFooter'
+import DesktopOnlyScreen from '@/components/admin/resume/DesktopOnlyScreen'
 import {
   SECTIONS,
   getSectionIndex,
@@ -203,6 +204,14 @@ export default function ResumeManager() {
 
   return (
     <div>
+      <div className="lg:hidden">
+        <DesktopOnlyScreen
+          kicker="Admin · Resume Builder"
+          heading="Step up to a bigger canvas."
+          body="The résumé builder runs on seven interactive panels, drag-to-reorder entries, and a live side-by-side preview. It needs real estate to breathe — open this page on a laptop or desktop to continue."
+        />
+      </div>
+      <div className="hidden lg:block">
       <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="mb-1 font-mono text-[0.7rem] uppercase tracking-[0.18em] text-text-muted">
@@ -262,6 +271,7 @@ export default function ResumeManager() {
         <div ref={printRef}>
           <ResumeDocument data={data} />
         </div>
+      </div>
       </div>
     </div>
   )

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useReactToPrint } from 'react-to-print'
-import { ArrowLeft, Download, Loader2 } from 'lucide-react'
+import { ArrowLeft, Download, Loader2, Monitor } from 'lucide-react'
 import ResumeDocument from '@/components/admin/resume/ResumeDocument'
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase'
 import { pdfFileName } from '@/lib/resumeFormat'
@@ -102,11 +102,19 @@ export default function Resume() {
           <p className="hidden font-mono text-[0.7rem] uppercase tracking-[0.22em] text-text-muted sm:block">
             Résumé
           </p>
+          <span
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface/60 px-3 py-2 font-body text-[0.75rem] text-text-muted lg:hidden"
+            role="note"
+            aria-label="PDF download available on desktop"
+          >
+            <Monitor className="h-3.5 w-3.5" />
+            Download on desktop
+          </span>
           <button
             type="button"
             onClick={onDownload}
             disabled={state !== 'ready'}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-accent px-4 py-2 font-body text-[0.8125rem] font-medium text-background transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+            className="hidden cursor-pointer items-center gap-2 rounded-lg bg-accent px-4 py-2 font-body text-[0.8125rem] font-medium text-background transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 lg:inline-flex"
           >
             <Download className="h-4 w-4" />
             Download PDF
@@ -141,29 +149,34 @@ export default function Resume() {
         )}
 
         {state === 'ready' && data && (
-          <div
-            ref={frameRef}
-            className="relative mx-auto overflow-hidden rounded-sm bg-white shadow-2xl shadow-black/60 ring-1 ring-black/5"
-            style={{ height: `${framedHeight}px` }}
-          >
+          <>
             <div
-              style={{
-                transform: `scale(${scale})`,
-                transformOrigin: 'top left',
-                width: `${PAGE_WIDTH_PX}px`,
-              }}
+              ref={frameRef}
+              className="relative mx-auto overflow-hidden rounded-sm bg-white shadow-2xl shadow-black/60 ring-1 ring-black/5"
+              style={{ height: `${framedHeight}px` }}
             >
               <div
-                ref={docRef}
                 style={{
+                  transform: `scale(${scale})`,
+                  transformOrigin: 'top left',
                   width: `${PAGE_WIDTH_PX}px`,
-                  minHeight: `${PAGE_HEIGHT_PX}px`,
                 }}
               >
-                <ResumeDocument data={data} />
+                <div
+                  ref={docRef}
+                  style={{
+                    width: `${PAGE_WIDTH_PX}px`,
+                    minHeight: `${PAGE_HEIGHT_PX}px`,
+                  }}
+                >
+                  <ResumeDocument data={data} />
+                </div>
               </div>
             </div>
-          </div>
+            <p className="mt-6 text-center font-mono text-[0.65rem] uppercase tracking-[0.22em] text-text-muted lg:hidden">
+              Viewing on mobile · open on desktop to download a pixel-perfect PDF
+            </p>
+          </>
         )}
       </main>
 
