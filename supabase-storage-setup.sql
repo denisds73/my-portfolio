@@ -27,3 +27,31 @@ create policy "Authenticated users can delete thumbnails"
   on storage.objects for delete
   to authenticated
   using (bucket_id = 'thumbnails');
+
+-- ============================================
+-- Resume PDF bucket (published file downloaded by /resume visitors)
+-- ============================================
+
+insert into storage.buckets (id, name, public)
+values ('resumes', 'resumes', true)
+on conflict (id) do nothing;
+
+create policy "Public can read resumes"
+  on storage.objects for select
+  to anon, authenticated
+  using (bucket_id = 'resumes');
+
+create policy "Authenticated users can upload resumes"
+  on storage.objects for insert
+  to authenticated
+  with check (bucket_id = 'resumes' and name = 'published/resume-latest.pdf');
+
+create policy "Authenticated users can update resumes"
+  on storage.objects for update
+  to authenticated
+  using (bucket_id = 'resumes' and name = 'published/resume-latest.pdf');
+
+create policy "Authenticated users can delete resumes"
+  on storage.objects for delete
+  to authenticated
+  using (bucket_id = 'resumes' and name = 'published/resume-latest.pdf');

@@ -15,6 +15,8 @@ import ResumePreview from '@/components/admin/resume/ResumePreview'
 import ResumeDocument from '@/components/admin/resume/ResumeDocument'
 import SectionNav from '@/components/admin/resume/SectionNav'
 import SectionFooter from '@/components/admin/resume/SectionFooter'
+import PublishCard from '@/components/admin/resume/PublishCard'
+import { useResumePublish } from '@/hooks/useResumePublish'
 import {
   SECTIONS,
   getSectionIndex,
@@ -98,6 +100,7 @@ function renderActiveEditor(
 
 export default function ResumeManager() {
   const { data, setData, status, lastSavedAt } = useResume()
+  const publishState = useResumePublish()
   const [now, setNow] = useState(() => new Date())
   const printRef = useRef<HTMLDivElement | null>(null)
 
@@ -221,6 +224,8 @@ export default function ResumeManager() {
           Download PDF
         </button>
       </header>
+
+      <PublishCard publishState={publishState} />
 
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(420px,520px)]">
         <div className="overflow-hidden rounded-xl border border-border bg-surface/30">
