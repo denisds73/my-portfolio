@@ -52,7 +52,7 @@ export default function ProjectCarousel({ images, title }: ProjectCarouselProps)
   return (
     <div
       ref={containerRef}
-      className="relative bg-bg-card"
+      className="relative aspect-[16/10] bg-bg-card"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       onTouchStart={(e) => { touchStart.current = e.touches[0].clientX }}
@@ -88,7 +88,7 @@ export default function ProjectCarousel({ images, title }: ProjectCarouselProps)
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); goTo(current - 1) }}
-        className={`absolute left-3 top-1/2 -translate-y-1/2 cursor-pointer rounded-full bg-bg/60 px-2.5 py-2 text-text-primary backdrop-blur-sm transition-all hover:bg-bg/80 ${
+        className={`absolute left-3 top-1/2 -translate-y-1/2 cursor-pointer rounded-full bg-bg/60 px-2.5 py-2 text-text-primary backdrop-blur-sm transition-all hover:bg-bg/80 focus-visible:opacity-100 ${
           isHovering ? 'opacity-100' : 'opacity-0'
         }`}
         aria-label="Previous image"
@@ -100,7 +100,7 @@ export default function ProjectCarousel({ images, title }: ProjectCarouselProps)
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); goTo(current + 1) }}
-        className={`absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer rounded-full bg-bg/60 px-2.5 py-2 text-text-primary backdrop-blur-sm transition-all hover:bg-bg/80 ${
+        className={`absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer rounded-full bg-bg/60 px-2.5 py-2 text-text-primary backdrop-blur-sm transition-all hover:bg-bg/80 focus-visible:opacity-100 ${
           isHovering ? 'opacity-100' : 'opacity-0'
         }`}
         aria-label="Next image"
