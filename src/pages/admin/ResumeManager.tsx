@@ -128,6 +128,15 @@ export default function ResumeManager() {
     const onKey = (e: KeyboardEvent) => {
       if (!(e.metaKey || e.ctrlKey)) return
       if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+      const t = e.target as HTMLElement | null
+      if (
+        t &&
+        (t.tagName === 'INPUT' ||
+          t.tagName === 'TEXTAREA' ||
+          t.isContentEditable)
+      ) {
+        return
+      }
       const i = getSectionIndex(active)
       const candidate = e.key === 'ArrowLeft' ? SECTIONS[i - 1] : SECTIONS[i + 1]
       if (!candidate) return
@@ -205,6 +214,7 @@ export default function ResumeManager() {
         <button
           type="button"
           onClick={() => handlePrint()}
+          disabled={status === 'loading'}
           className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-background transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
         >
           <Download className="h-4 w-4" />

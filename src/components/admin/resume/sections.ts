@@ -28,24 +28,23 @@ export const SECTIONS: SectionSpec[] = [
 
 export function isSectionComplete(data: ResumeData, key: SectionKey): boolean {
   switch (key) {
-    case 'personal':
-      return Boolean(
-        data.personal.firstName.trim() ||
-          data.personal.lastName.trim() ||
-          data.personal.email.trim(),
-      )
+    case 'personal': {
+      const { firstName, lastName, email } = data.personal
+      const hasName = Boolean(firstName.trim() || lastName.trim())
+      return hasName && Boolean(email.trim())
+    }
     case 'summary':
       return data.summary.trim().length > 0
     case 'skills':
-      return data.skills.some((g) => g.skills.length > 0)
+      return data.skills.some((g) => g.category.trim() && g.skills.length > 0)
     case 'experience':
-      return data.experience.length > 0
+      return data.experience.some((e) => e.company.trim() || e.role.trim())
     case 'projects':
-      return data.projects.length > 0
+      return data.projects.some((p) => p.name.trim())
     case 'education':
-      return data.education.length > 0
+      return data.education.some((e) => e.school.trim() || e.degree.trim())
     case 'certifications':
-      return data.certifications.length > 0
+      return data.certifications.some((c) => c.name.trim())
   }
 }
 

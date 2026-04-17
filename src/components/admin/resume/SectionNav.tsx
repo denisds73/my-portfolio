@@ -73,7 +73,7 @@ export default function SectionNav({ active, onSelect, completion }: Props) {
             {completion[s.key] && (
               <span
                 aria-hidden="true"
-                className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-accent"
+                className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-accent ring-2 ring-surface"
               />
             )}
           </button>
