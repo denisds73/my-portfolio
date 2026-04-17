@@ -51,7 +51,7 @@ export default function AdminLayout() {
                 to={item.href}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
                   isActive
-                    ? 'bg-accent-muted text-accent'
+                    ? 'bg-accent-glow text-accent'
                     : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
                 }`}
               >

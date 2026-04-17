@@ -24,7 +24,7 @@ export default function CertificationsEditor({ value, onChange }: Props) {
       onChange={onChange}
       makeEmpty={makeEmpty}
       addLabel="Add cert"
-      emptyLabel="Add certifications to strengthen your profile (optional)."
+      emptyLabel="No certifications yet. This section is optional and will be hidden from the resume if empty."
       renderItem={(item, update) => {
         const setField = <K extends keyof ResumeCertEntry>(
           k: K,

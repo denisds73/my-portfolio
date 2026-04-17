@@ -34,10 +34,20 @@ export default function SectionFooter({ active, onNavigate }: Props) {
         disabled={!next}
         onClick={() => next && onNavigate(next.key)}
         aria-label={next ? `Next section: ${next.label}` : 'No next section'}
-        className="group inline-flex cursor-pointer items-center gap-3 rounded-lg bg-accent px-4 py-2.5 text-right text-background transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-accent"
+        className={
+          next
+            ? 'group inline-flex cursor-pointer items-center gap-3 rounded-lg bg-accent px-4 py-2.5 text-right text-background transition-colors hover:bg-accent-hover'
+            : 'group inline-flex cursor-not-allowed items-center gap-3 rounded-lg border border-border px-4 py-2.5 text-right text-text-muted opacity-60'
+        }
       >
         <span className="flex flex-col items-end leading-tight">
-          <span className="font-mono text-[0.6rem] uppercase tracking-[0.22em] opacity-80">
+          <span
+            className={
+              next
+                ? 'font-mono text-[0.6rem] uppercase tracking-[0.22em] opacity-80'
+                : 'font-mono text-[0.6rem] uppercase tracking-[0.22em] text-text-muted'
+            }
+          >
             Next
           </span>
           <span className="font-body text-sm font-medium">{next?.label ?? '—'}</span>

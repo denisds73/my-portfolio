@@ -27,7 +27,7 @@ export default function Resume() {
     let cancelled = false
     async function load() {
       if (!isSupabaseConfigured) {
-        setState('error')
+        setState('empty')
         return
       }
       try {
@@ -106,7 +106,7 @@ export default function Resume() {
             type="button"
             onClick={onDownload}
             disabled={state !== 'ready'}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-sm bg-accent px-4 py-2 font-body text-[0.8125rem] font-medium text-background transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-accent px-4 py-2 font-body text-[0.8125rem] font-medium text-background transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download className="h-4 w-4" />
             Download PDF

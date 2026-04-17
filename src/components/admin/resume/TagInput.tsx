@@ -43,11 +43,12 @@ export default function TagInput({ label, value, onChange, placeholder }: Props)
         {value.map((tag) => (
           <span
             key={tag}
-            className="inline-flex items-center gap-1 rounded-md bg-background px-2 py-0.5 text-xs text-text-primary"
+            className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-0.5 text-xs text-text-primary"
           >
             {tag}
             <button
               type="button"
+              onMouseDown={(e) => e.preventDefault()}
               onClick={() => remove(tag)}
               className="cursor-pointer text-text-muted hover:text-accent"
               aria-label={`Remove ${tag}`}

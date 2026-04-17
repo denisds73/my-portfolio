@@ -98,7 +98,7 @@ export default function ResumePreview({ data }: Props) {
       </div>
       <div
         ref={frameRef}
-        className="relative overflow-hidden shadow-2xl shadow-black/40"
+        className="relative overflow-hidden rounded-md shadow-2xl shadow-black/40"
         style={{
           height: `${framedHeight}px`,
           background: '#fff',
