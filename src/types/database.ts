@@ -77,4 +77,8 @@ export interface ResumeRow {
   singleton: boolean
   data: ResumeData
   updated_at: string
+  published_pdf_path: string | null
+  published_file_name: string | null
+  published_file_size: number | null
+  published_at: string | null
 }

@@ -164,3 +164,12 @@ create policy "Authenticated users can delete resume"
   on public.resume for delete
   to authenticated
   using (true);
+
+-- 6. Resume published PDF metadata (Option B: admin uploads Chrome-generated PDF)
+-- ============================================
+
+alter table public.resume
+  add column if not exists published_pdf_path text,
+  add column if not exists published_file_name text,
+  add column if not exists published_file_size integer,
+  add column if not exists published_at timestamptz;

@@ -6,6 +6,7 @@ import ResumeDocument from '@/components/admin/resume/ResumeDocument'
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase'
 import { pdfFileName } from '@/lib/resumeFormat'
 import { RESUME_PRINT_PAGE_STYLE } from '@/lib/resumePrintStyle'
+import { downloadUrl as resumeDownloadUrl } from '@/lib/resumePublish'
 import { emptyResume, type ResumeData } from '@/types/resume'
 
 const PAGE_WIDTH_PX = 96 * 8.5
@@ -13,9 +14,15 @@ const PAGE_HEIGHT_PX = 96 * 11
 
 type LoadState = 'loading' | 'ready' | 'empty' | 'error'
 
+interface PublishedInfo {
+  path: string
+  fileName: string
+}
+
 export default function Resume() {
   const [data, setData] = useState<ResumeData | null>(null)
   const [state, setState] = useState<LoadState>('loading')
+  const [published, setPublished] = useState<PublishedInfo | null>(null)
 
   const frameRef = useRef<HTMLDivElement | null>(null)
   const docRef = useRef<HTMLDivElement | null>(null)
@@ -33,13 +40,21 @@ export default function Resume() {
       try {
         const { data: row, error } = await getSupabase()
           .from('resume')
-          .select('data')
+          .select('data, published_pdf_path, published_file_name')
           .eq('singleton', true)
           .maybeSingle()
         if (cancelled) return
         if (error) throw error
         if (row?.data) {
           setData({ ...emptyResume(), ...(row.data as ResumeData) })
+          if (row.published_pdf_path && row.published_file_name) {
+            setPublished({
+              path: row.published_pdf_path as string,
+              fileName: row.published_file_name as string,
+            })
+          } else {
+            setPublished(null)
+          }
           setState('ready')
         } else {
           setState('empty')
@@ -102,15 +117,25 @@ export default function Resume() {
           <p className="hidden font-mono text-[0.7rem] uppercase tracking-[0.22em] text-text-muted sm:block">
             Résumé
           </p>
-          <button
-            type="button"
-            onClick={onDownload}
-            disabled={state !== 'ready'}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-accent px-4 py-2 font-body text-[0.8125rem] font-medium text-background transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <Download className="h-4 w-4" />
-            Download PDF
-          </button>
+          {published ? (
+            <a
+              href={resumeDownloadUrl(published.path, published.fileName)}
+              className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 font-body text-[0.8125rem] font-medium text-background transition-colors hover:bg-accent-hover"
+            >
+              <Download className="h-4 w-4" />
+              Download PDF
+            </a>
+          ) : (
+            <button
+              type="button"
+              onClick={onDownload}
+              disabled={state !== 'ready'}
+              className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-accent px-4 py-2 font-body text-[0.8125rem] font-medium text-background transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Download className="h-4 w-4" />
+              Download PDF
+            </button>
+          )}
         </div>
       </header>
 
