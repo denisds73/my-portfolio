@@ -253,10 +253,12 @@ export default function ResumeManager() {
       <div
         aria-hidden="true"
         style={{
-          position: 'fixed',
+          position: 'absolute',
           left: '-10000px',
           top: 0,
           width: '8.5in',
+          pointerEvents: 'none',
+          zIndex: -1,
         }}
       >
         <div ref={printRef}>

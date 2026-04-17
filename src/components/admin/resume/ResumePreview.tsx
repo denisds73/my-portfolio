@@ -39,11 +39,16 @@ export default function ResumePreview({ data }: Props) {
     update()
     const ro = new ResizeObserver(update)
     ro.observe(doc)
+    if (typeof document !== 'undefined' && document.fonts?.ready) {
+      document.fonts.ready.then(update).catch(() => {})
+    }
     return () => ro.disconnect()
   }, [])
 
   const pages = Math.max(1, Math.ceil(docHeight / PAGE_HEIGHT_PX))
-  const framedHeight = Math.max(PAGE_HEIGHT_PX, docHeight) * scale
+  // Content-fit: frame only grows to actual rendered height. Avoids a huge
+  // empty white void when the resume is short.
+  const framedHeight = Math.max(docHeight, 200) * scale
 
   // Render dashed dividers at each page boundary.
   const pageBreaks = []
@@ -115,7 +120,6 @@ export default function ResumePreview({ data }: Props) {
             ref={docRef}
             style={{
               width: `${PAGE_WIDTH_PX}px`,
-              minHeight: `${PAGE_HEIGHT_PX}px`,
             }}
           >
             <ResumeDocument data={data} />

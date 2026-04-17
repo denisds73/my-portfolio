@@ -75,6 +75,10 @@ export default function Resume() {
     update()
     const ro = new ResizeObserver(update)
     ro.observe(doc)
+
+    if (typeof document !== 'undefined' && document.fonts?.ready) {
+      document.fonts.ready.then(update).catch(() => {})
+    }
     return () => ro.disconnect()
   }, [state])
 
@@ -86,18 +90,39 @@ export default function Resume() {
 
   const onDownload = useCallback(() => handlePrint(), [handlePrint])
 
-  const framedHeight = Math.max(PAGE_HEIGHT_PX, docHeight) * scale
+  const pages = Math.max(1, Math.ceil(docHeight / PAGE_HEIGHT_PX))
+  const framedHeight = Math.max(docHeight, 200) * scale
+
+  const pageBreaks: React.ReactNode[] = []
+  for (let i = 1; i < pages; i++) {
+    pageBreaks.push(
+      <div
+        key={`rule-${i}`}
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          top: `${i * PAGE_HEIGHT_PX * scale}px`,
+          height: 0,
+          borderTop: '1.5px dashed rgba(0,0,0,0.18)',
+          pointerEvents: 'none',
+        }}
+      />,
+    )
+  }
 
   return (
     <div className="min-h-screen bg-bg text-text-primary">
       <header className="sticky top-0 z-20 border-b border-border/60 bg-bg/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[960px] items-center justify-between px-6 py-4">
+        <div className="mx-auto flex max-w-[960px] items-center justify-between gap-3 px-4 py-4 sm:px-6">
           <Link
             to="/"
             className="group inline-flex items-center gap-2 font-body text-[0.8125rem] tracking-[0.02em] text-text-secondary transition-colors hover:text-accent"
           >
             <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-            Back to portfolio
+            <span className="hidden sm:inline">Back to portfolio</span>
+            <span className="sm:hidden">Back</span>
           </Link>
           <p className="hidden font-mono text-[0.7rem] uppercase tracking-[0.22em] text-text-muted sm:block">
             Résumé
@@ -109,12 +134,13 @@ export default function Resume() {
             className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-accent px-4 py-2 font-body text-[0.8125rem] font-medium text-background transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download className="h-4 w-4" />
-            Download PDF
+            <span className="hidden sm:inline">Download PDF</span>
+            <span className="sm:hidden">PDF</span>
           </button>
         </div>
       </header>
 
-      <main className="mx-auto max-w-[960px] px-6 py-10">
+      <main className="mx-auto max-w-[960px] px-4 py-6 sm:px-6 sm:py-10">
         {state === 'loading' && (
           <div className="flex min-h-[60vh] items-center justify-center text-text-muted">
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -141,29 +167,34 @@ export default function Resume() {
         )}
 
         {state === 'ready' && data && (
-          <div
-            ref={frameRef}
-            className="relative mx-auto overflow-hidden rounded-sm bg-white shadow-2xl shadow-black/60 ring-1 ring-black/5"
-            style={{ height: `${framedHeight}px` }}
-          >
+          <>
             <div
-              style={{
-                transform: `scale(${scale})`,
-                transformOrigin: 'top left',
-                width: `${PAGE_WIDTH_PX}px`,
-              }}
+              ref={frameRef}
+              className="relative mx-auto overflow-hidden rounded-md bg-white shadow-2xl shadow-black/60 ring-1 ring-black/5"
+              style={{ height: `${framedHeight}px` }}
             >
               <div
-                ref={docRef}
                 style={{
+                  transform: `scale(${scale})`,
+                  transformOrigin: 'top left',
                   width: `${PAGE_WIDTH_PX}px`,
-                  minHeight: `${PAGE_HEIGHT_PX}px`,
                 }}
               >
-                <ResumeDocument data={data} />
+                <div
+                  ref={docRef}
+                  style={{
+                    width: `${PAGE_WIDTH_PX}px`,
+                  }}
+                >
+                  <ResumeDocument data={data} />
+                </div>
               </div>
+              {pageBreaks}
             </div>
-          </div>
+            <p className="mt-4 text-center font-mono text-[0.65rem] uppercase tracking-[0.22em] text-text-muted sm:hidden">
+              Preview scaled to fit — tap download for a full-quality PDF.
+            </p>
+          </>
         )}
       </main>
 
@@ -171,10 +202,12 @@ export default function Resume() {
         <div
           aria-hidden="true"
           style={{
-            position: 'fixed',
+            position: 'absolute',
             left: '-10000px',
             top: 0,
             width: '8.5in',
+            pointerEvents: 'none',
+            zIndex: -1,
           }}
         >
           <div ref={printRef}>
