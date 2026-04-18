@@ -113,6 +113,13 @@ body {
   color: var(--color-text-secondary);
 }
 
+.type-body-lead {
+  font-family: var(--font-body);
+  font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+  letter-spacing: 0.02em;
+  line-height: 1.6;
+}
+
 .type-label {
   font-family: var(--font-body);
   font-size: 0.6875rem;

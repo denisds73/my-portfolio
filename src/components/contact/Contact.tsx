@@ -119,7 +119,7 @@ export default function Contact() {
               <h2 className="font-display text-[clamp(2rem,4vw,3.5rem)] font-bold leading-[1.1] tracking-[-0.03em] text-text-primary">
                 Let's build<br />something good.
               </h2>
-              <p className="mt-5 max-w-md font-body text-[clamp(0.9rem,1vw,1.05rem)] font-light leading-relaxed text-text-secondary">
+              <p className="type-body mt-5 max-w-md">
                 Whether you're a recruiter sizing up a candidate, a hiring
                 manager evaluating fit, or a collaborator with an idea — send a
                 note. I read every message.
@@ -129,7 +129,7 @@ export default function Contact() {
                 <p className="type-label mb-2">Email</p>
                 <a
                   href={`mailto:${EMAIL}`}
-                  className="break-all font-body text-[clamp(0.9rem,1.2vw,1.1rem)] font-medium text-accent transition-opacity hover:opacity-70"
+                  className="type-body-lead break-all font-medium text-accent transition-opacity hover:opacity-70"
                 >
                   {EMAIL}
                 </a>

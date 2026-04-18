@@ -85,11 +85,12 @@ export default function MonthPicker({
 
       {/* Present toggle */}
       {allowPresent && (
-        <label className="mt-2 flex cursor-pointer items-center gap-2">
-          <div
-            className={`relative h-5 w-9 rounded-full transition-colors ${
-              isPresent ? 'bg-accent' : 'bg-border'
-            }`}
+        <div className="mt-2 flex items-center gap-2">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={isPresent}
+            aria-label="Currently working here"
             onClick={() => {
               const next = !isPresent
               onPresentChange?.(next)
@@ -98,15 +99,19 @@ export default function MonthPicker({
                 setOpen(false)
               }
             }}
+            className={`relative h-5 w-9 cursor-pointer rounded-full transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+              isPresent ? 'bg-accent' : 'bg-border'
+            }`}
           >
-            <div
+            <span
+              aria-hidden="true"
               className={`absolute top-0.5 h-4 w-4 rounded-full bg-text-primary transition-transform ${
                 isPresent ? 'translate-x-4' : 'translate-x-0.5'
               }`}
             />
-          </div>
+          </button>
           <span className="text-xs text-text-muted">Currently working here</span>
-        </label>
+        </div>
       )}
 
       {/* Dropdown */}
