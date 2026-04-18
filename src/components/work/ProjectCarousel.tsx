@@ -1,15 +1,19 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useReducedMotion } from 'framer-motion'
 
 interface ProjectCarouselProps {
   images: string[]
   title: string
+  autoAdvanceMs?: number
 }
 
-export default function ProjectCarousel({ images, title }: ProjectCarouselProps) {
+export default function ProjectCarousel({ images, title, autoAdvanceMs = 4500 }: ProjectCarouselProps) {
   const [current, setCurrent] = useState(0)
   const [isHovering, setIsHovering] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
   const touchStart = useRef<number | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const prefersReducedMotion = useReducedMotion()
 
   const total = images.length
 
@@ -27,6 +31,39 @@ export default function ProjectCarousel({ images, title }: ProjectCarouselProps)
     el.addEventListener('keydown', handleKey)
     return () => el.removeEventListener('keydown', handleKey)
   }, [current, goTo])
+
+  // Auto-advance — paused on hover, keyboard focus, or when reduced motion is on.
+  // IntersectionObserver keeps off-screen carousels from ticking in the background.
+  useEffect(() => {
+    if (total <= 1 || prefersReducedMotion || isHovering || isFocused) return
+    const el = containerRef.current
+    if (!el) return
+
+    let interval: ReturnType<typeof setInterval> | null = null
+    const start = () => {
+      if (interval) return
+      interval = setInterval(() => {
+        setCurrent((c) => (c + 1) % total)
+      }, autoAdvanceMs)
+    }
+    const stop = () => {
+      if (interval) {
+        clearInterval(interval)
+        interval = null
+      }
+    }
+
+    const io = new IntersectionObserver(
+      ([entry]) => { entry.isIntersecting ? start() : stop() },
+      { threshold: 0.3 },
+    )
+    io.observe(el)
+
+    return () => {
+      io.disconnect()
+      stop()
+    }
+  }, [total, prefersReducedMotion, isHovering, isFocused, autoAdvanceMs])
 
   if (total === 0) return null
 
@@ -55,6 +92,8 @@ export default function ProjectCarousel({ images, title }: ProjectCarouselProps)
       className="relative aspect-[16/10] bg-bg-card"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
       onTouchStart={(e) => { touchStart.current = e.touches[0].clientX }}
       onTouchEnd={(e) => {
         if (touchStart.current === null) return
