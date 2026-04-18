@@ -37,19 +37,20 @@ export default function About() {
             className={`reveal type-body ${visible ? 'visible' : ''}`}
             style={{ transitionDelay: '0.1s' }}
           >
-            I'm a frontend-focused fullstack engineer with over five years of experience building
+            I'm a frontend-focused fullstack engineer with 2+ years of experience building
             data-intensive web applications. My work lives at the intersection of engineering
-            precision and design sensibility — I care as much about render performance as I do about
-            the spacing between elements.
+            precision and design sensibility. I care as much about render performance as I do
+            about the spacing between elements.
           </p>
           <p
             className={`reveal type-body ${visible ? 'visible' : ''}`}
             style={{ transitionDelay: '0.2s' }}
           >
-            I've led frontend architecture for SaaS platforms, shipped products from zero at
-            early-stage startups, and built component systems used by multiple teams. Whether it's a
-            real-time analytics dashboard processing millions of data points or a complex form
-            workflow that needs to feel effortless, I bring the same obsession with craft.
+            I've contributed to frontend architecture on SaaS platforms, helped ship products
+            from zero at early-stage startups, and worked on component systems used across
+            teams. Whether it's a real-time analytics dashboard processing millions of data
+            points or a complex form workflow that needs to feel effortless, I bring the same
+            obsession with craft.
           </p>
           <p
             className={`reveal type-body ${visible ? 'visible' : ''}`}

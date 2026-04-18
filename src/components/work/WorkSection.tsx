@@ -70,7 +70,7 @@ function EntryKickerRow({
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
       <p className="flex items-baseline gap-2 font-mono text-[0.7rem] uppercase tracking-[0.22em]">
-        <span className="text-accent">{`\u2116\u00A0${number}`}</span>
+        <span className="text-accent">{number}</span>
         {year && (
           <>
             <span aria-hidden="true" className="text-border-hover">
@@ -108,9 +108,12 @@ function EntryKickerRow({
             href={project.github_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-text-muted transition-colors hover:text-text-primary"
+            className="group inline-flex items-center gap-1 text-accent transition-opacity hover:opacity-80"
             aria-label={`View source for ${project.title} (opens in new tab)`}
           >
+            <span aria-hidden="true" className="transition-transform group-hover:-translate-y-0.5">
+              ↗
+            </span>
             Source
           </a>
         )}
@@ -226,14 +229,6 @@ export default function WorkSection() {
             Projects
           </h2>
         </div>
-        <p
-          className={`reveal hidden font-mono text-[0.72rem] uppercase tracking-[0.22em] text-text-muted md:block ${
-            headerVisible ? 'visible' : ''
-          }`}
-          style={{ transitionDelay: '0.18s' }}
-        >
-          {projects.length} {projects.length === 1 ? 'entry' : 'entries'}
-        </p>
       </div>
 
       <div className="mx-auto flex max-w-[1280px] flex-col gap-[clamp(56px,8vh,120px)] border-b border-border pb-10">
