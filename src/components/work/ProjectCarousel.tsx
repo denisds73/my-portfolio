@@ -121,8 +121,9 @@ export default function ProjectCarousel({ images, title }: ProjectCarouselProps)
             aria-label={`Go to image ${i + 1}`}
           >
             <span
-              className="absolute inset-0 transition-colors duration-300"
-              style={{ backgroundColor: i === current ? 'var(--color-accent)' : 'rgba(240,237,230,0.15)' }}
+              className={`absolute inset-0 transition-colors duration-300 ${
+                i === current ? 'bg-accent' : 'bg-text-primary/15'
+              }`}
             />
           </button>
         ))}

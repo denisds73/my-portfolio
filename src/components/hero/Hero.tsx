@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 
 export default function Hero() {
   const [cueVisible, setCueVisible] = useState(true)
+  const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,16 +19,16 @@ export default function Hero() {
 
   const stagger = {
     hidden: {},
-    show: { transition: { staggerChildren: 0.12, delayChildren: 0.2 } },
+    show: { transition: { staggerChildren: prefersReducedMotion ? 0 : 0.12, delayChildren: prefersReducedMotion ? 0 : 0.2 } },
   }
 
   const fadeUp = {
-    hidden: { opacity: 0, y: 24 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] as const } },
+    hidden: prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 },
+    show: { opacity: 1, y: 0, transition: { duration: prefersReducedMotion ? 0 : 0.7, ease: [0.16, 1, 0.3, 1] as const } },
   }
 
   return (
-    <section className="relative flex min-h-[100vh] items-center overflow-hidden px-6">
+    <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6">
       {/* Ambient glow */}
       <div className="hero-glow absolute right-[10%] top-[15%]" aria-hidden="true" />
       <div className="hero-noise" aria-hidden="true" />
@@ -44,11 +45,13 @@ export default function Hero() {
 
         <motion.h1 variants={fadeUp} className="type-hero">
           Denis
+          <span className="sr-only"> — Frontend-Focused Fullstack Engineer</span>
         </motion.h1>
 
         <motion.p
           variants={fadeUp}
-          className="mt-2 font-body text-[clamp(0.9rem,1.2vw,1.1rem)] font-normal tracking-[0.02em] text-text-muted"
+          aria-hidden="true"
+          className="type-body-lead mt-2 text-text-muted"
         >
           Frontend-Focused Fullstack Engineer
         </motion.p>

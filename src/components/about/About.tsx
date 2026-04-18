@@ -1,17 +1,20 @@
-import { useRef, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 export default function About() {
-  const sectionRef = useRef<HTMLElement>(null)
   const [visible, setVisible] = useState(false)
+  const observerRef = useRef<IntersectionObserver | null>(null)
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
+  const sectionRef = useCallback((node: HTMLElement | null) => {
+    if (observerRef.current) observerRef.current.disconnect()
+    if (!node) return
+    observerRef.current = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) setVisible(true) },
       { threshold: 0.15 },
     )
-    if (sectionRef.current) observer.observe(sectionRef.current)
-    return () => observer.disconnect()
+    observerRef.current.observe(node)
   }, [])
+
+  useEffect(() => () => observerRef.current?.disconnect(), [])
 
   return (
     <section
@@ -23,7 +26,7 @@ export default function About() {
         {/* Left column — label + pull quote, offset down on desktop */}
         <div className={`reveal md:mt-16 ${visible ? 'visible' : ''}`}>
           <p className="type-label mb-8">About</p>
-          <p className="font-display text-[clamp(1.5rem,2.5vw,2rem)] italic leading-[1.2] tracking-[-0.02em] text-text-primary">
+          <p className="type-subsection italic">
             I thrive where performance meets pixel-perfect design.
           </p>
         </div>
