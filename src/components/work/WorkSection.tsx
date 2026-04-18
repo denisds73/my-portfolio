@@ -223,7 +223,7 @@ export default function WorkSection() {
             className={`reveal type-section-title ${headerVisible ? 'visible' : ''}`}
             style={{ transitionDelay: '0.1s' }}
           >
-            Selected Projects
+            Projects
           </h2>
         </div>
         <p
