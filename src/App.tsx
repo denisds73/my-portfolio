@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Navbar from '@/components/layout/Navbar'
 import ScrollProgress from '@/components/layout/ScrollProgress'
-import CustomCursor from '@/components/layout/CustomCursor'
 import Home from '@/pages/Home'
 import Resume from '@/pages/Resume'
 import AdminLogin from '@/pages/admin/Login'
@@ -21,7 +20,6 @@ export default function App() {
           element={
             <>
               <ScrollProgress />
-              <CustomCursor />
               <Navbar />
               <main>
                 <Home />
