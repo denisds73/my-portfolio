@@ -1,168 +1,27 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
-import { Download, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
-import { useReactToPrint } from 'react-to-print'
-import { useResume, type UseResumeReturn } from '@/hooks/useResume'
-import PersonalInfoEditor from '@/components/admin/resume/PersonalInfoEditor'
-import SummaryEditor from '@/components/admin/resume/SummaryEditor'
-import ExperienceEditor from '@/components/admin/resume/ExperienceEditor'
-import EducationEditor from '@/components/admin/resume/EducationEditor'
-import SkillsEditor from '@/components/admin/resume/SkillsEditor'
-import ProjectsEditor from '@/components/admin/resume/ProjectsEditor'
-import CertificationsEditor from '@/components/admin/resume/CertificationsEditor'
-import ResumePreview from '@/components/admin/resume/ResumePreview'
-import ResumeDocument from '@/components/admin/resume/ResumeDocument'
-import SectionNav from '@/components/admin/resume/SectionNav'
-import SectionFooter from '@/components/admin/resume/SectionFooter'
-import PublishCard from '@/components/admin/resume/PublishCard'
-import { useResumePublish } from '@/hooks/useResumePublish'
-import {
-  SECTIONS,
-  getSectionIndex,
-  isSectionComplete,
-  isValidSection,
-  type SectionKey,
-} from '@/components/admin/resume/sections'
-import type { ResumeData } from '@/types/resume'
-import { pdfFileName } from '@/lib/resumeFormat'
-import { RESUME_PRINT_PAGE_STYLE } from '@/lib/resumePrintStyle'
-
-function relativeTime(from: Date | null, now: Date): string {
-  if (!from) return ''
-  const diff = Math.max(0, Math.round((now.getTime() - from.getTime()) / 1000))
-  if (diff < 5) return 'just now'
-  if (diff < 60) return `${diff}s ago`
-  const mins = Math.round(diff / 60)
-  if (mins < 60) return `${mins}m ago`
-  const hrs = Math.round(mins / 60)
-  if (hrs < 24) return `${hrs}h ago`
-  return from.toLocaleString()
-}
-
-function renderActiveEditor(
-  key: SectionKey,
-  data: ResumeData,
-  setData: UseResumeReturn['setData'],
-) {
-  switch (key) {
-    case 'personal':
-      return (
-        <PersonalInfoEditor
-          value={data.personal}
-          onChange={(personal) => setData((d) => ({ ...d, personal }))}
-        />
-      )
-    case 'summary':
-      return (
-        <SummaryEditor
-          value={data.summary}
-          onChange={(summary) => setData((d) => ({ ...d, summary }))}
-        />
-      )
-    case 'skills':
-      return (
-        <SkillsEditor
-          value={data.skills}
-          onChange={(skills) => setData((d) => ({ ...d, skills }))}
-        />
-      )
-    case 'experience':
-      return (
-        <ExperienceEditor
-          value={data.experience}
-          onChange={(experience) => setData((d) => ({ ...d, experience }))}
-        />
-      )
-    case 'projects':
-      return (
-        <ProjectsEditor
-          value={data.projects}
-          onChange={(projects) => setData((d) => ({ ...d, projects }))}
-        />
-      )
-    case 'education':
-      return (
-        <EducationEditor
-          value={data.education}
-          onChange={(education) => setData((d) => ({ ...d, education }))}
-        />
-      )
-    case 'certifications':
-      return (
-        <CertificationsEditor
-          value={data.certifications}
-          onChange={(certifications) => setData((d) => ({ ...d, certifications }))}
-        />
-      )
-  }
-}
+import { useEffect, useState } from 'react'
+import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
+import { useResume } from '@/hooks/useResume'
 
 export default function ResumeManager() {
   const { data, setData, status, lastSavedAt } = useResume()
-  const publishState = useResumePublish()
   const [now, setNow] = useState(() => new Date())
-  const printRef = useRef<HTMLDivElement | null>(null)
-
-  const [searchParams, setSearchParams] = useSearchParams()
-  const sectionParam = searchParams.get('section')
-  const active: SectionKey = isValidSection(sectionParam) ? sectionParam : 'personal'
-
-  const setActive = useCallback(
-    (key: SectionKey) => {
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev)
-          next.set('section', key)
-          return next
-        },
-        { replace: false },
-      )
-    },
-    [setSearchParams],
-  )
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000)
     return () => clearInterval(id)
   }, [])
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (!(e.metaKey || e.ctrlKey)) return
-      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
-      const t = e.target as HTMLElement | null
-      if (
-        t &&
-        (t.tagName === 'INPUT' ||
-          t.tagName === 'TEXTAREA' ||
-          t.isContentEditable)
-      ) {
-        return
-      }
-      const i = getSectionIndex(active)
-      const candidate = e.key === 'ArrowLeft' ? SECTIONS[i - 1] : SECTIONS[i + 1]
-      if (!candidate) return
-      e.preventDefault()
-      setActive(candidate.key)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [active, setActive])
-
-  const completion = useMemo(
-    () =>
-      Object.fromEntries(
-        SECTIONS.map((s) => [s.key, isSectionComplete(data, s.key)]),
-      ) as Record<SectionKey, boolean>,
-    [data],
-  )
-
-  const handlePrint = useReactToPrint({
-    contentRef: printRef,
-    documentTitle: pdfFileName(data.personal).replace(/\.pdf$/, ''),
-    pageStyle: RESUME_PRINT_PAGE_STYLE,
-  })
+  function relativeTime(from: Date | null, now: Date): string {
+    if (!from) return ''
+    const diff = Math.max(0, Math.round((now.getTime() - from.getTime()) / 1000))
+    if (diff < 5) return 'just now'
+    if (diff < 60) return `${diff}s ago`
+    const mins = Math.round(diff / 60)
+    if (mins < 60) return `${mins}m ago`
+    const hrs = Math.round(mins / 60)
+    if (hrs < 24) return `${hrs}h ago`
+    return from.toLocaleString()
+  }
 
   const statusChip = (() => {
     if (status === 'loading') {
@@ -185,7 +44,7 @@ export default function ResumeManager() {
       return (
         <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/5 px-3 py-1 text-xs text-red-400">
           <AlertCircle className="h-3 w-3" />
-          Save failed — changes stored locally
+          Save failed
         </span>
       )
     }
@@ -197,11 +56,7 @@ export default function ResumeManager() {
         </span>
       )
     }
-    return (
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-xs text-text-muted">
-        Draft
-      </span>
-    )
+    return null
   })()
 
   return (
@@ -211,62 +66,25 @@ export default function ResumeManager() {
           <p className="mb-1 font-mono text-[0.7rem] uppercase tracking-[0.18em] text-text-muted">
             Admin · Resume
           </p>
-          <h1 className="font-display text-3xl text-text-primary">Resume Builder</h1>
+          <h1 className="font-display text-3xl text-text-primary">Resume Link</h1>
           <div className="mt-3 flex items-center gap-2">{statusChip}</div>
         </div>
-        <button
-          type="button"
-          onClick={() => handlePrint()}
-          disabled={status === 'loading'}
-          className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-background transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <Download className="h-4 w-4" />
-          Download PDF
-        </button>
       </header>
 
-      <PublishCard publishState={publishState} />
-
-      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(420px,520px)]">
-        <div className="overflow-hidden rounded-xl border border-border bg-surface/30">
-          <SectionNav active={active} onSelect={setActive} completion={completion} />
-          <div
-            role="tabpanel"
-            id="resume-section-panel"
-            aria-labelledby={`resume-tab-${active}`}
-            className="min-h-[420px] p-6"
-          >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={active}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.14, ease: 'easeOut' }}
-              >
-                {renderActiveEditor(active, data, setData)}
-              </motion.div>
-            </AnimatePresence>
-            <SectionFooter active={active} onNavigate={setActive} />
-          </div>
-        </div>
-        <aside className="xl:sticky xl:top-8 xl:h-[calc(100vh-4rem)] xl:overflow-y-auto">
-          <ResumePreview data={data} />
-        </aside>
-      </div>
-
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'fixed',
-          left: '-10000px',
-          top: 0,
-          width: '8.5in',
-        }}
-      >
-        <div ref={printRef}>
-          <ResumeDocument data={data} />
-        </div>
+      <div className="overflow-hidden rounded-xl border border-border bg-surface p-6 shadow-xl max-w-2xl">
+        <label className="block mb-2 text-sm font-medium text-text-primary">
+          Resume URL
+        </label>
+        <input
+          type="url"
+          className="w-full rounded-md border border-border bg-bg px-4 py-2 text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
+          placeholder="https://example.com/resume.pdf"
+          value={data.url || ''}
+          onChange={(e) => setData({ ...data, url: e.target.value })}
+        />
+        <p className="mt-4 text-sm text-text-muted">
+          Visitors clicking "Résumé" anywhere on your portfolio will be instantly redirected to this URL.
+        </p>
       </div>
     </div>
   )
