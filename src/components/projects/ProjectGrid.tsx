@@ -20,11 +20,11 @@ export default function ProjectGrid() {
         description="A selection of projects that showcase my approach to building efficient, user-centric applications."
       />
 
-      <div className="mb-10 flex flex-wrap items-center justify-center gap-2">
+      <nav aria-label="Project filters" className="mb-10 flex flex-wrap items-center justify-center gap-2">
         <button
           type="button"
           onClick={() => setFilter(null)}
-          className={`cursor-pointer rounded-lg px-3 py-1.5 font-mono text-xs transition-colors ${
+          className={`cursor-pointer rounded-lg px-3 py-1.5 font-mono text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
             !filter
               ? 'bg-accent text-background'
               : 'text-text-muted hover:bg-surface hover:text-text-primary'
@@ -37,7 +37,7 @@ export default function ProjectGrid() {
             type="button"
             key={tech}
             onClick={() => setFilter(tech)}
-            className={`cursor-pointer rounded-lg px-3 py-1.5 font-mono text-xs transition-colors ${
+            className={`cursor-pointer rounded-lg px-3 py-1.5 font-mono text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
               filter === tech
                 ? 'bg-accent text-background'
                 : 'text-text-muted hover:bg-surface hover:text-text-primary'
@@ -46,22 +46,15 @@ export default function ProjectGrid() {
             {tech}
           </button>
         ))}
-      </div>
+      </nav>
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={filter || 'all'}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="grid gap-6 sm:grid-cols-2"
-        >
+      <motion.ul layout className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <AnimatePresence mode="popLayout">
           {filtered.map((project, i) => (
             <ProjectCard key={project.id} project={project} index={i} />
           ))}
-        </motion.div>
-      </AnimatePresence>
+        </AnimatePresence>
+      </motion.ul>
     </Section>
   )
 }
