@@ -27,6 +27,10 @@ export default function ProjectsManager() {
       ? (data.tech_stack as unknown as string).split(',').map((s: string) => s.trim()).filter(Boolean)
       : data.tech_stack
 
+    const highlightsArray = typeof data.highlights === 'string'
+      ? (data.highlights as unknown as string).split('\n').map((s: string) => s.trim()).filter(Boolean)
+      : data.highlights || []
+
     const sortOrder = editing
       ? data.sort_order
       : projects.length > 0
@@ -36,6 +40,7 @@ export default function ProjectsManager() {
     const payload = {
       ...data,
       tech_stack: techStack,
+      highlights: highlightsArray,
       thumbnail_url: images[0] || '',
       images,
       sort_order: sortOrder,
@@ -66,6 +71,7 @@ export default function ProjectsManager() {
     setValue('live_url', project.live_url)
     setValue('github_url', project.github_url)
     setValue('tech_stack', project.tech_stack as unknown as string[])
+    setValue('highlights', project.highlights ? (project.highlights.join('\n') as unknown as string[]) : [])
     setValue('featured', project.featured)
     setValue('sort_order', project.sort_order)
     // Load images — fall back to thumbnail_url for old projects
@@ -108,6 +114,12 @@ export default function ProjectsManager() {
             <MultiImageUploader images={images} onChange={setImages} />
             <Textarea label="Description" rows={2} {...register('description', { required: true })} />
             <Textarea label="Long Description" rows={3} {...register('long_description')} />
+            <Textarea 
+              label="Highlights (one per line)" 
+              rows={3} 
+              {...register('highlights')} 
+              placeholder="e.g. Architected backend in Node.js...&#10;Increased performance by 40%..."
+            />
             <div className="grid gap-4 sm:grid-cols-2">
               <Input label="Live URL" {...register('live_url')} />
               <Input label="GitHub URL" {...register('github_url')} />
