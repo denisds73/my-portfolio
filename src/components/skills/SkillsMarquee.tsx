@@ -73,7 +73,7 @@ export default function SkillsSection() {
                 {grouped.get(category)!.map((name) => (
                   <li
                     key={name}
-                    className="rounded-md border border-border/50 bg-bg-surface/50 px-3 py-1.5 font-body text-[0.8125rem] tracking-wide text-text-primary backdrop-blur-sm transition-all duration-300 ease-out hover:-translate-y-[2px] hover:border-accent hover:bg-accent/10 hover:text-accent hover:shadow-sm"
+                    className="rounded-md border border-border/50 bg-bg-surface/50 px-3 py-1.5 font-body text-[0.8125rem] tracking-wide text-text-primary backdrop-blur-sm transition-all duration-300 ease-out hover:border-accent hover:bg-accent/10 hover:text-accent hover:shadow-sm"
                   >
                     {name}
                   </li>
