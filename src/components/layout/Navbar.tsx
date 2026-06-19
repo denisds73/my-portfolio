@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import AnimatedLogo from '../ui/AnimatedLogo'
 
 const navLinks = [
   { label: 'About', href: '#about' },
@@ -94,11 +95,8 @@ export default function Navbar() {
         className="mx-auto flex max-w-[1280px] items-center justify-between px-6 transition-all duration-500"
         style={{ paddingTop: scrolled ? '12px' : '24px', paddingBottom: scrolled ? '12px' : '24px' }}
       >
-        <a
-          href="/"
-          className="font-display text-lg tracking-tight text-text-primary transition-colors hover:text-accent"
-        >
-          denis<span className="text-accent">.</span>
+        <a href="/" aria-label="Home" className="focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm">
+          <AnimatedLogo />
         </a>
 
         {/* Desktop nav links */}
