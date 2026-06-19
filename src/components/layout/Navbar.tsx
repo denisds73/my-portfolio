@@ -108,7 +108,17 @@ export default function Navbar() {
         className="mx-auto flex max-w-[1280px] items-center justify-between px-6 transition-all duration-500"
         style={{ paddingTop: scrolled ? '16px' : '28px', paddingBottom: scrolled ? '16px' : '28px' }}
       >
-        <a href="/" aria-label="Home" className="focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm h-7 flex items-center">
+        <a 
+          href="/" 
+          onClick={(e) => {
+            if (window.location.pathname === '/') {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          }}
+          aria-label="Back to top" 
+          className="focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm h-7 flex items-center"
+        >
           {!showSplash && <AnimatedLogo layoutId="main-logo" animatePaths={false} className="h-7" />}
         </a>
 
