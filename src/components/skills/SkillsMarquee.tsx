@@ -1,24 +1,9 @@
-import { useRef, useEffect, useState, useCallback } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
+import type { Variants } from 'framer-motion'
 import { useSkills } from '@/hooks/usePortfolioData'
 
 export default function SkillsSection() {
-  const [visible, setVisible] = useState(false)
-  const observerRef = useRef<IntersectionObserver | null>(null)
-
-  const sectionRef = useCallback((node: HTMLElement | null) => {
-    if (observerRef.current) observerRef.current.disconnect()
-    if (!node) return
-    observerRef.current = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setVisible(true) },
-      { threshold: 0.1 },
-    )
-    observerRef.current.observe(node)
-  }, [])
-
-  useEffect(() => {
-    return () => { observerRef.current?.disconnect() }
-  }, [])
-
+  const prefersReducedMotion = useReducedMotion()
   const { skills } = useSkills()
 
   if (skills.length === 0) return null
@@ -39,38 +24,65 @@ export default function SkillsSection() {
     ...[...grouped.keys()].filter((c) => !categoryOrder.includes(c)),
   ]
 
-  return (
-    <section ref={sectionRef} id="skills" className="section-padding scroll-mt-20 px-6">
-      <div className="mx-auto max-w-[1280px]">
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { 
+        staggerChildren: prefersReducedMotion ? 0 : 0.08,
+        delayChildren: prefersReducedMotion ? 0 : 0.1,
+      }
+    }
+  }
 
-        <h2
-          className={`reveal type-section-title mb-14 ${visible ? 'visible' : ''}`}
-          style={{ transitionDelay: '0.1s' }}
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: prefersReducedMotion ? 0 : 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } 
+    }
+  }
+
+  return (
+    <section id="skills" className="section-padding scroll-mt-20 px-6">
+      <div className="mx-auto max-w-[1280px]">
+        
+        <motion.h2
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-10%" }}
+          variants={itemVariants}
+          className="type-section-title mb-14"
         >
           Tech I Work With
-        </h2>
+        </motion.h2>
 
-        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
-          {sortedCategories.map((category, catIdx) => (
-            <div
-              key={category}
-              className={`reveal ${visible ? 'visible' : ''}`}
-              style={{ transitionDelay: `${0.15 + catIdx * 0.08}s` }}
-            >
-              <p className="type-label-accent mb-5">{category}</p>
-              <div className="flex flex-wrap gap-2">
+        <motion.div 
+          className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-10%" }}
+          variants={containerVariants}
+        >
+          {sortedCategories.map((category) => (
+            <motion.div key={category} variants={itemVariants}>
+              <h3 className="type-label-accent mb-5">{category}</h3>
+              
+              <ul className="flex flex-wrap gap-2">
                 {grouped.get(category)!.map((name) => (
-                  <span
+                  <li
                     key={name}
-                    className="rounded-sm border border-border-hover px-3 py-1.5 font-body text-[0.8125rem] tracking-wide text-text-primary transition-colors hover:border-accent hover:text-accent"
+                    className="rounded-md border border-border/50 bg-bg-surface/50 px-3 py-1.5 font-body text-[0.8125rem] tracking-wide text-text-primary backdrop-blur-sm transition-all duration-300 ease-out hover:-translate-y-[2px] hover:border-accent hover:bg-accent/10 hover:text-accent hover:shadow-sm"
                   >
                     {name}
-                  </span>
+                  </li>
                 ))}
-              </div>
-            </div>
+              </ul>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
+
       </div>
     </section>
   )
