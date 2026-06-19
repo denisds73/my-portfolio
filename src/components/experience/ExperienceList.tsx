@@ -1,4 +1,5 @@
-import { useRef, useEffect, useState, useCallback } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
+import type { Variants } from 'framer-motion'
 import { useExperience } from '@/hooks/usePortfolioData'
 
 function formatDate(dateStr: string): string {
@@ -10,62 +11,83 @@ function formatDate(dateStr: string): string {
 }
 
 export default function ExperienceList() {
-  const [visible, setVisible] = useState(false)
-  const observerRef = useRef<IntersectionObserver | null>(null)
-
-  const sectionRef = useCallback((node: HTMLElement | null) => {
-    if (observerRef.current) observerRef.current.disconnect()
-    if (!node) return
-    observerRef.current = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setVisible(true) },
-      { threshold: 0.15 },
-    )
-    observerRef.current.observe(node)
-  }, [])
-
-  useEffect(() => {
-    return () => { observerRef.current?.disconnect() }
-  }, [])
-
+  const prefersReducedMotion = useReducedMotion()
   const { experience } = useExperience()
 
   if (experience.length === 0) return null
 
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { 
+        staggerChildren: prefersReducedMotion ? 0 : 0.08,
+        delayChildren: prefersReducedMotion ? 0 : 0.15,
+      }
+    }
+  }
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: prefersReducedMotion ? 0 : 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } 
+    }
+  }
+
   return (
-    <section ref={sectionRef} id="experience" className="section-padding scroll-mt-20 px-6">
+    <section id="experience" aria-labelledby="experience-heading" className="section-padding scroll-mt-20 px-6">
       <div className="mx-auto max-w-[1280px]">
-        <p className={`reveal type-label mb-4 ${visible ? 'visible' : ''}`}>Experience</p>
-        <h2
-          className={`reveal type-section-title mb-12 ${visible ? 'visible' : ''}`}
-          style={{ transitionDelay: '0.1s' }}
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
         >
-          Where I've Worked
-        </h2>
+          <motion.p variants={itemVariants} className="type-label mb-4">Experience</motion.p>
+          <motion.h2 variants={itemVariants} id="experience-heading" className="type-section-title mb-12">
+            Where I've Worked
+          </motion.h2>
+        </motion.div>
 
-        <div>
-          {experience.map((exp, i) => (
-            <div
+        <motion.ul 
+          className="list-none"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+          variants={containerVariants}
+        >
+          {experience.map((exp) => (
+            <motion.li
               key={exp.id}
-              className={`reveal border-t border-border py-6 md:py-8 ${visible ? 'visible' : ''}`}
-              style={{ transitionDelay: `${0.15 + i * 0.08}s` }}
+              variants={itemVariants}
+              className="group border-t border-border py-8 transition-colors hover:border-accent/50 md:py-12"
             >
-              <div className="grid items-baseline gap-2 md:grid-cols-[1fr_1.5fr_auto] md:gap-8">
-                <h3 className="type-experience-company">{exp.company}</h3>
-                <p className="font-body text-[clamp(0.875rem,1vw,1rem)] text-text-secondary">
-                  {exp.role}
-                </p>
-                <p className="type-label text-text-muted">
-                  {formatDate(exp.start_date)} — {exp.end_date ? formatDate(exp.end_date) : 'Present'}
-                </p>
-              </div>
+              <article className="grid gap-6 md:grid-cols-[1fr_2.5fr] md:gap-12">
+                <div className="flex flex-col gap-1 md:pt-1">
+                  <h4 className="font-display text-base font-semibold text-accent transition-colors group-hover:text-accent/80">{exp.company}</h4>
+                  <p className="type-label text-text-muted">
+                    <time dateTime={exp.start_date}>{formatDate(exp.start_date)}</time>
+                    <span className="sr-only"> to </span>
+                    {exp.end_date ? (
+                      <time dateTime={exp.end_date}>{formatDate(exp.end_date)}</time>
+                    ) : 'Present'}
+                  </p>
+                </div>
 
-              <p className="mt-3 font-body text-sm leading-relaxed text-text-muted">
-                {exp.description}
-              </p>
-            </div>
+                <div className="flex flex-col gap-3">
+                  <h3 className="font-display text-xl font-bold tracking-tight text-text-primary">{exp.role}</h3>
+                  <div className="max-w-[65ch] font-body text-[0.9375rem] leading-relaxed text-text-muted">
+                    {exp.description.split('\n').map((line, idx) => (
+                      <p key={idx} className={idx > 0 ? "mt-2" : ""}>{line}</p>
+                    ))}
+                  </div>
+                </div>
+              </article>
+            </motion.li>
           ))}
-          <div className="border-t border-border" />
-        </div>
+          <motion.li variants={itemVariants} className="border-t border-border" aria-hidden="true" />
+        </motion.ul>
       </div>
     </section>
   )
