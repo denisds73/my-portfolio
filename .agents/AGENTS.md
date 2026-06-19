@@ -5,4 +5,4 @@
 - Keep communications clear, concise, and free of clutter.
 - When asked to push or merge, always create a new branch first, raise a PR, and then merge and push automatically (no further permission needed).
 - Before committing, pushing, or merging, always verify the project builds successfully (e.g., run `npm run build`) to catch any broken imports or type errors.
-- Whenever asked for a plan, report, or study, do NOT present it as a markdown (.md) file. Instead, create a temporary HTML file and automatically open it in the Comet browser (using the `open` command).
+- Whenever asked for a plan, report, or study, do NOT present it as a markdown (.md) file. Instead, create a temporary HTML file and automatically open it specifically in the Comet browser (using `open -a "Comet" <file>`). Immediately after opening it, use the `ask_question` tool to provide an interactive prompt in the chat for the user to select an option or provide feedback.
