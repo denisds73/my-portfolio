@@ -97,6 +97,7 @@ export default function Navbar() {
   }, [])
 
   return (
+    <>
     <header
       className={`fixed top-0 z-50 w-full border-b transition-all duration-500 ${
         scrolled
@@ -201,55 +202,56 @@ export default function Navbar() {
           WebkitMaskImage: 'linear-gradient(to bottom, black 0%, transparent 100%)'
         }}
       />
+    </header>
 
-      {/* Mobile fullscreen overlay */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: motionDuration }}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Menu"
-            className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-bg/95 backdrop-blur-2xl md:hidden"
-            onClick={() => setIsOpen(false)}
-          >
-            <div className="flex flex-col items-center gap-8" onClick={(e) => e.stopPropagation()}>
-              {navLinks.map((link, i) => (
-                <motion.button
-                  key={link.href}
-                  type="button"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: motionDuration, delay: prefersReducedMotion ? 0 : i * 0.05 }}
-                  onClick={() => handleNavClick(link.href)}
-                  className="cursor-pointer font-display text-3xl tracking-tight text-text-primary transition-colors hover:text-accent"
-                >
-                  {link.label}
-                </motion.button>
-              ))}
-
-              {/* Mobile resume link */}
-              <motion.a
-                href="/resume"
-                target="_blank"
-                rel="noopener noreferrer"
+    {/* Mobile fullscreen overlay */}
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: motionDuration }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu"
+          className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-bg/95 backdrop-blur-2xl md:hidden"
+          onClick={() => setIsOpen(false)}
+        >
+          <div className="flex flex-col items-center gap-8" onClick={(e) => e.stopPropagation()}>
+            {navLinks.map((link, i) => (
+              <motion.button
+                key={link.href}
+                type="button"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: motionDuration, delay: prefersReducedMotion ? 0 : navLinks.length * 0.05 }}
-                onClick={() => setIsOpen(false)}
-                className="font-body text-lg uppercase tracking-[0.08em] text-text-muted transition-colors hover:text-accent"
+                transition={{ duration: motionDuration, delay: prefersReducedMotion ? 0 : i * 0.05 }}
+                onClick={() => handleNavClick(link.href)}
+                className="cursor-pointer font-display text-3xl tracking-tight text-text-primary transition-colors hover:text-accent"
               >
-                Résumé ↗
-              </motion.a>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </header>
+                {link.label}
+              </motion.button>
+            ))}
+
+            {/* Mobile resume link */}
+            <motion.a
+              href="/resume"
+              target="_blank"
+              rel="noopener noreferrer"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: motionDuration, delay: prefersReducedMotion ? 0 : navLinks.length * 0.05 }}
+              onClick={() => setIsOpen(false)}
+              className="font-body text-lg uppercase tracking-[0.08em] text-text-muted transition-colors hover:text-accent"
+            >
+              Résumé ↗
+            </motion.a>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+    </>
   )
 }
