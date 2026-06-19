@@ -13,7 +13,10 @@ export default function ProjectsManager() {
   const [editing, setEditing] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [images, setImages] = useState<string[]>([])
-  const { register, handleSubmit, reset, setValue } = useForm<ProjectForm>()
+  const { register, handleSubmit, reset, setValue, watch } = useForm<ProjectForm>({
+    defaultValues: { detail_type: 'breakdown' }
+  })
+  const detailType = watch('detail_type')
 
   const fetchProjects = async () => {
     const { data } = await getSupabase().from('projects').select('*').order('sort_order')
@@ -27,15 +30,17 @@ export default function ProjectsManager() {
       ? (data.tech_stack as unknown as string).split(',').map((s: string) => s.trim()).filter(Boolean)
       : data.tech_stack
 
-    const highlightsArray = typeof data.highlights === 'string'
-      ? (data.highlights as unknown as string).split('\n').map((s: string) => s.trim()).filter(Boolean)
-      : data.highlights || []
+
 
     const sortOrder = editing
       ? data.sort_order
       : projects.length > 0
         ? Math.max(...projects.map((p) => p.sort_order)) + 1
         : 1
+
+    const highlightsArray = typeof data.highlights === 'string'
+      ? (data.highlights as unknown as string).split('\n').map((s: string) => s.trim()).filter(Boolean)
+      : data.highlights || []
 
     const payload = {
       ...data,
@@ -46,11 +51,21 @@ export default function ProjectsManager() {
       sort_order: sortOrder,
     }
 
+    let error = null
     if (editing) {
-      await getSupabase().from('projects').update(payload).eq('id', editing)
+      const { error: updateError } = await getSupabase().from('projects').update(payload).eq('id', editing)
+      error = updateError
     } else {
-      await getSupabase().from('projects').insert(payload)
+      const { error: insertError } = await getSupabase().from('projects').insert(payload)
+      error = insertError
     }
+    
+    if (error) {
+      console.error('Supabase error:', error)
+      alert(`Error saving project: ${error.message || error.details || JSON.stringify(error)}`)
+      return
+    }
+
     setEditing(null)
     setShowForm(false)
     resetForm()
@@ -74,6 +89,8 @@ export default function ProjectsManager() {
     setValue('highlights', project.highlights ? (project.highlights.join('\n') as unknown as string[]) : [])
     setValue('featured', project.featured)
     setValue('sort_order', project.sort_order)
+    setValue('detail_type', project.detail_type || 'breakdown')
+    setValue('case_study_content', project.case_study_content || '')
     // Load images — fall back to thumbnail_url for old projects
     const projectImages = project.images?.length > 0
       ? project.images
@@ -114,12 +131,50 @@ export default function ProjectsManager() {
             <MultiImageUploader images={images} onChange={setImages} />
             <Textarea label="Description" rows={2} {...register('description', { required: true })} />
             <Textarea label="Long Description" rows={3} {...register('long_description')} />
-            <Textarea 
-              label="Highlights (one per line)" 
-              rows={3} 
-              {...register('highlights')} 
-              placeholder="e.g. Architected backend in Node.js...&#10;Increased performance by 40%..."
-            />
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-text-secondary">Presentation Mode</label>
+              <div className="flex rounded-lg border border-border bg-surface p-1">
+                <label className="relative flex-1 cursor-pointer">
+                  <input
+                    type="radio"
+                    value="breakdown"
+                    {...register('detail_type')}
+                    className="peer sr-only"
+                  />
+                  <div className="flex items-center justify-center rounded-md px-3 py-2 text-sm font-medium text-text-muted transition-all peer-checked:bg-bg peer-checked:text-text-primary peer-checked:shadow-sm">
+                    Project Breakdown (Modal)
+                  </div>
+                </label>
+                <label className="relative flex-1 cursor-pointer">
+                  <input
+                    type="radio"
+                    value="case_study"
+                    {...register('detail_type')}
+                    className="peer sr-only"
+                  />
+                  <div className="flex items-center justify-center rounded-md px-3 py-2 text-sm font-medium text-text-muted transition-all peer-checked:bg-bg peer-checked:text-text-primary peer-checked:shadow-sm">
+                    Case Study (Dedicated Page)
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            {detailType === 'breakdown' ? (
+              <Textarea 
+                label="Highlights (one per line)" 
+                rows={3} 
+                {...register('highlights')} 
+                placeholder="e.g. Architected backend in Node.js...&#10;Increased performance by 40%..."
+              />
+            ) : (
+              <Textarea 
+                label="Case Study Markdown Content" 
+                rows={10} 
+                {...register('case_study_content')} 
+                placeholder="## Problem&#10;Describe the problem...&#10;&#10;## Solution&#10;Describe the solution..."
+                className="font-mono text-sm"
+              />
+            )}
             <div className="grid gap-4 sm:grid-cols-2">
               <Input label="Live URL" {...register('live_url')} />
               <Input label="GitHub URL" {...register('github_url')} />

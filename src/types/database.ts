@@ -45,6 +45,8 @@ export interface Project {
   live_url: string | null
   github_url: string | null
   tech_stack: string[]
+  detail_type: 'breakdown' | 'case_study'
+  case_study_content?: string | null
   highlights?: string[]
   featured: boolean
   sort_order: number

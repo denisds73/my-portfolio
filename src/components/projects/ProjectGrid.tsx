@@ -3,12 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Section } from '@/components/layout'
 import { SectionHeading } from '@/components/ui'
 import ProjectCard from './ProjectCard'
+import ProjectModal from './ProjectModal'
+import type { Project } from '@/types'
 import { placeholderProjects } from '@/data/placeholder'
 
 export default function ProjectGrid() {
   const projects = placeholderProjects
   const allTechs = Array.from(new Set(projects.flatMap((p) => p.tech_stack)))
   const [filter, setFilter] = useState<string | null>(null)
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
   const filtered = filter ? projects.filter((p) => p.tech_stack.includes(filter)) : projects
 
@@ -51,10 +54,20 @@ export default function ProjectGrid() {
       <motion.ul layout className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <AnimatePresence mode="popLayout">
           {filtered.map((project, i) => (
-            <ProjectCard key={project.id} project={project} index={i} />
+            <ProjectCard 
+              key={project.id} 
+              project={project} 
+              index={i} 
+              onClick={setSelectedProject}
+            />
           ))}
         </AnimatePresence>
       </motion.ul>
+
+      <ProjectModal 
+        project={selectedProject} 
+        onClose={() => setSelectedProject(null)} 
+      />
     </Section>
   )
 }
