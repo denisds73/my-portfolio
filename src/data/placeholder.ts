@@ -11,6 +11,7 @@ export const placeholderProjects: Project[] = [
     live_url: 'https://example.com',
     github_url: 'https://github.com',
     tech_stack: ['React', 'TypeScript', 'D3.js', 'PostgreSQL', 'Redis'],
+    detail_type: 'breakdown',
     highlights: [
       'Processed 5M+ daily events with <100ms latency',
       'Implemented WebGL charts for 60fps rendering',
@@ -30,6 +31,7 @@ export const placeholderProjects: Project[] = [
     live_url: 'https://example.com',
     github_url: 'https://github.com',
     tech_stack: ['Next.js', 'Stripe', 'Prisma', 'TailwindCSS'],
+    detail_type: 'breakdown',
     highlights: [
       'Reduced LCP by 1.2s using Next.js Image optimization',
       'Increased checkout conversion rate by 15%',
@@ -49,6 +51,7 @@ export const placeholderProjects: Project[] = [
     live_url: null,
     github_url: 'https://github.com',
     tech_stack: ['React', 'Node.js', 'Socket.io', 'MongoDB'],
+    detail_type: 'breakdown',
     highlights: [
       'Engineered real-time sync using WebSocket',
       'Custom drag-and-drop implementation with 0 layout shift',
@@ -68,6 +71,7 @@ export const placeholderProjects: Project[] = [
     live_url: 'https://example.com',
     github_url: null,
     tech_stack: ['Vue.js', 'Python', 'FastAPI', 'WebSocket'],
+    detail_type: 'breakdown',
     highlights: [
       'Aggregated 15+ external financial APIs',
       'Built a custom rule-engine for real-time user alerts',

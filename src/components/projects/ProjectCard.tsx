@@ -6,9 +6,10 @@ import { Card } from '@/components/ui'
 interface ProjectCardProps {
   project: Project
   index: number
+  onClick: (project: Project) => void
 }
 
-export default function ProjectCard({ project, index }: ProjectCardProps) {
+export default function ProjectCard({ project, index, onClick }: ProjectCardProps) {
   const prefersReducedMotion = useReducedMotion()
 
   return (
@@ -20,7 +21,19 @@ export default function ProjectCard({ project, index }: ProjectCardProps) {
       transition={{ duration: 0.4, delay: prefersReducedMotion ? 0 : index * 0.05 }}
       className="list-none"
     >
-      <Card className="group flex h-full flex-col p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-accent/5">
+      <Card 
+        onClick={() => onClick(project)}
+        className="group flex h-full cursor-pointer flex-col p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-accent/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            onClick(project)
+          }
+        }}
+        aria-label={`View details for ${project.title}`}
+      >
         <article className="contents">
           {project.thumbnail_url ? (
             <div className="mb-4 aspect-video overflow-hidden rounded-lg bg-background">
@@ -41,12 +54,13 @@ export default function ProjectCard({ project, index }: ProjectCardProps) {
               <h3 className="text-lg font-semibold text-text-primary transition-colors group-hover:text-accent">
                 {project.title}
               </h3>
-              <div className="flex items-center gap-2">
+              <div className="flex shrink-0 items-center gap-2">
                 {project.github_url ? (
                   <a
                     href={project.github_url}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
                     aria-label={`View ${project.title} source code on GitHub`}
                     className="rounded-md p-1.5 text-text-muted transition-colors hover:bg-surface-hover hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   >
@@ -58,6 +72,7 @@ export default function ProjectCard({ project, index }: ProjectCardProps) {
                     href={project.live_url}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
                     aria-label={`Visit ${project.title} live site`}
                     className="rounded-md p-1.5 text-text-muted transition-colors hover:bg-surface-hover hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   >
@@ -67,15 +82,7 @@ export default function ProjectCard({ project, index }: ProjectCardProps) {
               </div>
             </div>
 
-            <p className="mb-4 flex-1 text-sm leading-relaxed text-text-secondary">{project.description}</p>
-
-            {project.highlights && project.highlights.length > 0 && (
-              <ul className="mb-6 ml-4 list-disc space-y-1 text-sm text-text-muted">
-                {project.highlights.map((highlight, idx) => (
-                  <li key={idx}>{highlight}</li>
-                ))}
-              </ul>
-            )}
+            <p className="mb-6 flex-1 text-sm leading-relaxed text-text-secondary">{project.description}</p>
 
             <div className="mt-auto flex flex-wrap gap-2">
               {project.tech_stack.map((tech) => (
