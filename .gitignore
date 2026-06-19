@@ -19,3 +19,5 @@ dist-ssr
 
 .superpowers/
 .remember/
+.agents/
+.agents/AGENTS.md

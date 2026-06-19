@@ -29,9 +29,6 @@ export default function Hero() {
 
   return (
     <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6">
-      {/* Ambient glow */}
-      <div className="hero-glow absolute right-[10%] top-[15%]" aria-hidden="true" />
-      <div className="hero-noise" aria-hidden="true" />
 
       <motion.div
         variants={stagger}

@@ -19,6 +19,7 @@ export default function App() {
           path="/"
           element={
             <>
+              <div className="gradient-mesh" aria-hidden="true" />
               <ScrollProgress />
               <Navbar />
               <main>
