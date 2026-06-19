@@ -20,12 +20,12 @@ export default function About() {
     <section
       ref={sectionRef}
       id="about"
-      className="section-padding scroll-mt-20 px-6"
+      className="min-h-[100dvh] flex items-center px-6"
     >
-      <div className="mx-auto grid max-w-[1280px] gap-12 md:grid-cols-[2fr_3fr] md:gap-20">
+      <div className="w-full mx-auto grid max-w-[1280px] gap-12 md:grid-cols-[2fr_3fr] md:gap-20">
         {/* Left column — label + pull quote, offset down on desktop */}
         <div className={`reveal md:mt-16 ${visible ? 'visible' : ''}`}>
-          <p className="type-label mb-8">About</p>
+          <p className={`reveal type-label mb-8 ${visible ? 'visible' : ''}`}>About</p>
           <p className="type-subsection italic">
             I thrive where performance meets pixel-perfect design.
           </p>

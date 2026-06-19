@@ -21,10 +21,23 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true)
 
   useEffect(() => {
+    // Force scroll to top on initial mount to prevent browser history scroll restoration
+    // from causing a slight offset during the splash screen
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+
     // 2.2 seconds allows the drawing animation (1.55s) to finish with a short pause
     const timer = setTimeout(() => {
       setShowSplash(false)
+      // Force scroll to top again exactly when splash screen unmounts and main content 
+      // becomes interactive, combating any layoutId or autofocus scroll jumping
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
     }, 2200)
+
+    // Handle standard scroll restoration
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual'
+    }
+
     return () => clearTimeout(timer)
   }, [])
 

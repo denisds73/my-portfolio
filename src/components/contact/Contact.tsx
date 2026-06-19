@@ -106,7 +106,7 @@ export default function Contact() {
         className="section-padding scroll-mt-20 px-6"
       >
         <div className="mx-auto max-w-[1280px]">
-          <p className={`reveal type-label-accent mb-12 ${visible ? 'visible' : ''}`}>
+          <p className={`reveal type-label mb-12 text-accent ${visible ? 'visible' : ''}`}>
             Contact
           </p>
 
@@ -126,10 +126,10 @@ export default function Contact() {
               </p>
 
               <div className="mt-8">
-                <p className="type-label mb-2">Email</p>
+                <p className="field-label mb-2">Email</p>
                 <a
                   href={`mailto:${EMAIL}`}
-                  className="type-body-lead break-all font-medium text-accent transition-opacity hover:opacity-70"
+                  className="text-lg font-medium text-accent transition-opacity hover:opacity-70 break-all"
                 >
                   {EMAIL}
                 </a>
@@ -161,7 +161,7 @@ export default function Contact() {
             >
               {status === 'sent' ? (
                 <div className="flex h-full flex-col justify-center">
-                  <p className="type-label-accent mb-3">Message received.</p>
+                  <p className="font-mono text-sm font-semibold uppercase tracking-widest text-accent mb-3">Message received.</p>
                   <p className="type-body">
                     Thanks for reaching out — I'll be in touch within a couple of
                     days.
@@ -277,19 +277,33 @@ export default function Contact() {
                     )}
                   </div>
 
-                  {status === 'error' && errorMsg && (
-                    <p
+                  {status === 'error' && (
+                    <div
                       role="alert"
-                      className="font-body text-[0.8125rem] text-red-400"
+                      className="rounded-lg border border-red-500/20 bg-red-500/10 p-4"
                     >
-                      {errorMsg}
-                    </p>
+                      <p className="font-body text-sm text-red-400">
+                        Looks like the network glitched. You can try again, or{' '}
+                        <a
+                          href={`mailto:${EMAIL}`}
+                          className="font-medium text-red-300 underline transition-colors hover:text-white"
+                        >
+                          email me directly
+                        </a>
+                        .
+                      </p>
+                      {errorMsg && (
+                        <p className="mt-2 font-mono text-[0.65rem] uppercase tracking-wider text-red-500/60">
+                          Error: {errorMsg}
+                        </p>
+                      )}
+                    </div>
                   )}
 
                   <button
                     type="submit"
                     disabled={status === 'sending'}
-                    className="group inline-flex cursor-pointer items-center gap-3 rounded-md bg-accent px-6 py-3 font-body text-[0.78rem] font-semibold uppercase tracking-[0.14em] text-background shadow-[0_10px_30px_-12px_rgba(255,90,54,0.6)] transition-all hover:bg-accent-hover hover:shadow-[0_14px_34px_-12px_rgba(255,90,54,0.7)] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+                    className="group inline-flex w-fit cursor-pointer items-center justify-center gap-3 rounded-full bg-accent px-8 py-4 font-body text-xs font-bold uppercase tracking-[0.12em] text-white shadow-[0_4px_24px_-8px_var(--color-accent)] transition-all hover:scale-[1.02] hover:opacity-90 hover:shadow-[0_8px_32px_-8px_var(--color-accent)] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:hover:scale-100"
                   >
                     {status === 'sending' ? 'Sending…' : 'Send message'}
                     {status !== 'sending' && (
