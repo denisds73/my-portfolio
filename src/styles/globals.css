@@ -205,7 +205,7 @@ body {
   font-size: 1.15rem;
   color: var(--color-text-primary);
   outline: none;
-  transition: border-color 0.4s var(--ease-apple);
+  transition: border-color 0.4s var(--ease-apple), box-shadow 0.4s var(--ease-apple);
 }
 
 .field-textarea {
@@ -216,6 +216,7 @@ body {
 .field-input:focus,
 .field-textarea:focus {
   border-bottom-color: var(--color-accent);
+  box-shadow: 0 12px 24px -12px var(--color-accent-glow);
 }
 
 .field-input:focus-visible,
