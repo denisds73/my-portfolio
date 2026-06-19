@@ -1,6 +1,8 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useProjects } from '@/hooks/usePortfolioData'
 import ProjectCarousel from './ProjectCarousel'
+import ProjectModal from '../projects/ProjectModal'
 import type { Project } from '@/types'
 
 function useReveal<T extends HTMLElement>() {
@@ -50,19 +52,28 @@ function ImageBlock({ project }: { project: Project }) {
   )
 }
 
-function ProjectEntry({ project }: { project: Project }) {
+function ProjectEntry({ project, onOpenDetails }: { project: Project; onOpenDetails: (p: Project) => void }) {
   const { ref, visible } = useReveal<HTMLElement>()
+  const navigate = useNavigate()
   const featured = project.featured
   const techList =
     project.tech_stack?.map((t) => t.trim()).filter(Boolean) ?? []
   const hasTech = techList.length > 0
+
+  const handleInteract = () => {
+    if (project.detail_type === 'case_study') {
+      navigate(`/case-study/${project.id}`)
+    } else {
+      onOpenDetails(project)
+    }
+  }
 
   return (
     <article
       ref={ref}
       className={`group relative pt-8 md:pt-10 ${
         featured
-          ? 'border-l-2 border-l-accent pl-6 md:pl-10'
+          ? 'border-l-2 border-l-accent px-6 pb-8 md:px-10 md:pb-10'
           : 'border-t border-border'
       }`}
       style={
@@ -119,15 +130,26 @@ function ProjectEntry({ project }: { project: Project }) {
             }`}
             style={{ transitionDelay: '0.36s' }}
           >
+            <button
+              onClick={handleInteract}
+              className="group/link inline-flex cursor-pointer items-center gap-1.5 font-body text-sm tracking-[0.08em] uppercase text-text-primary transition-opacity hover:text-accent"
+              aria-label={`View details for ${project.title}`}
+            >
+              {project.detail_type === 'case_study' ? 'Case Study' : 'Project Breakdown'}
+              <span aria-hidden="true" className="inline-block transition-transform group-hover/link:translate-x-0.5">
+                →
+              </span>
+            </button>
+
             {project.live_url && (
               <a
                 href={project.live_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group/link inline-flex cursor-pointer items-center gap-1.5 font-body text-sm tracking-[0.08em] uppercase text-accent transition-opacity hover:opacity-70"
+                className="group/link inline-flex cursor-pointer items-center gap-1.5 font-body text-sm tracking-[0.08em] uppercase text-text-muted transition-colors hover:text-text-primary"
                 aria-label={`View ${project.title} live (opens in new tab)`}
               >
-                View Project
+                Live
                 <span aria-hidden="true" className="inline-block transition-transform group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5">
                   ↗
                 </span>
@@ -150,8 +172,18 @@ function ProjectEntry({ project }: { project: Project }) {
           </div>
         </div>
         <div
-          className={`reveal ${visible ? 'visible' : ''}`}
+          className={`reveal cursor-pointer transition-transform duration-500 hover:scale-[1.02] ${visible ? 'visible' : ''}`}
           style={{ transitionDelay: '0.32s' }}
+          onClick={handleInteract}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              handleInteract()
+            }
+          }}
+          aria-label={`View details for ${project.title}`}
         >
           <ImageBlock project={project} />
         </div>
@@ -163,8 +195,58 @@ function ProjectEntry({ project }: { project: Project }) {
 export default function WorkSection() {
   const { projects } = useProjects()
   const { ref: headerRef, visible: headerVisible } = useReveal<HTMLDivElement>()
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
-  if (projects.length === 0) return null
+  // Handle deep linking
+  useEffect(() => {
+    if (projects.length === 0) return
+
+    const handleHashChange = () => {
+      // Check if URL has ?project=id or similar logic. Actually, we use URLSearchParams
+      const params = new URLSearchParams(window.location.search)
+      const projectId = params.get('project')
+      
+      if (projectId) {
+        const found = projects.find((p) => p.id === projectId)
+        if (found) setSelectedProject(found)
+      } else {
+        setSelectedProject(null)
+      }
+    }
+
+    // Initial check
+    handleHashChange()
+
+    // Listen to popstate for back button navigation
+    window.addEventListener('popstate', handleHashChange)
+    return () => window.removeEventListener('popstate', handleHashChange)
+  }, [projects])
+
+  // Update URL when selected project changes
+  const handleProjectSelect = (project: Project | null) => {
+    setSelectedProject(project)
+    
+    const url = new URL(window.location.href)
+    if (project) {
+      url.searchParams.set('project', project.id)
+      window.history.pushState({}, '', url.toString())
+    } else {
+      url.searchParams.delete('project')
+      // If we're closing, we should ideally go back instead of pushing a new state if we just opened it, 
+      // but pushState/replaceState is easier. Let's just push state to keep it simple, or back if applicable.
+      // Better: just push State so forward/back works predictably.
+      window.history.pushState({}, '', url.toString())
+    }
+  }
+
+  // Also close modal on Escape to ensure URL syncs back
+  const handleClose = useCallback(() => {
+    handleProjectSelect(null)
+  }, [])
+
+  if (projects.length === 0) {
+    return <section id="work" className="scroll-mt-20"></section>
+  }
 
   // Sort: featured projects first, then by sort_order
   const sorted = [...projects].sort((a, b) => {
@@ -180,7 +262,6 @@ export default function WorkSection() {
         className="mx-auto mb-[clamp(48px,7vh,96px)] flex max-w-[1280px] items-end justify-between gap-6"
       >
         <div>
-
           <h2
             className={`reveal type-section-title ${headerVisible ? 'visible' : ''}`}
             style={{ transitionDelay: '0.1s' }}
@@ -192,9 +273,12 @@ export default function WorkSection() {
 
       <div className="mx-auto flex max-w-[1280px] flex-col gap-[clamp(56px,8vh,120px)] border-b border-border pb-[clamp(56px,8vh,120px)]">
         {sorted.map((project) => (
-          <ProjectEntry key={project.id} project={project} />
+          <ProjectEntry key={project.id} project={project} onOpenDetails={handleProjectSelect} />
         ))}
       </div>
+
+      {/* Dynamic import of ProjectModal from projects folder */}
+      <ProjectModal project={selectedProject} onClose={handleClose} />
     </section>
   )
 }

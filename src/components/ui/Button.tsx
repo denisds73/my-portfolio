@@ -7,10 +7,10 @@ interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'siz
 }
 
 const variants = {
-  primary: 'bg-accent text-background hover:bg-accent-hover font-medium',
+  primary: 'bg-accent text-[#020203] transition-all hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] font-medium',
   secondary:
-    'border border-border text-text-primary hover:border-accent hover:text-accent bg-transparent',
-  ghost: 'text-text-secondary hover:text-text-primary hover:bg-surface bg-transparent',
+    'border border-border text-text-primary hover:border-accent hover:text-accent bg-transparent transition-all',
+  ghost: 'text-text-secondary hover:text-text-primary hover:bg-surface bg-transparent transition-all',
 }
 
 const sizes = {
