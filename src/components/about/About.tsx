@@ -27,7 +27,7 @@ export default function About() {
     <section
       id="about"
       aria-labelledby="about-heading"
-      className="min-h-[100dvh] flex items-center px-6"
+      className="min-h-[100svh] flex items-center px-6"
     >
       <motion.div
         initial="hidden"
