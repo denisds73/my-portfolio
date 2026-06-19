@@ -42,7 +42,7 @@ export default function SkillsSection() {
   return (
     <section ref={sectionRef} id="skills" className="section-padding scroll-mt-20 px-6">
       <div className="mx-auto max-w-[1280px]">
-        <p className={`reveal type-label mb-4 ${visible ? 'visible' : ''}`}>Technologies</p>
+
         <h2
           className={`reveal type-section-title mb-14 ${visible ? 'visible' : ''}`}
           style={{ transitionDelay: '0.1s' }}

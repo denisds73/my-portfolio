@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
+import { SplashContext } from '@/App'
 
 export default function Hero() {
   const [cueVisible, setCueVisible] = useState(true)
   const prefersReducedMotion = useReducedMotion()
+  const showSplash = useContext(SplashContext)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,33 +19,40 @@ export default function Hero() {
     document.querySelector(id)?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const stagger = {
+  const opticalContainer = {
     hidden: {},
-    show: { transition: { staggerChildren: prefersReducedMotion ? 0 : 0.12, delayChildren: prefersReducedMotion ? 0 : 0.2 } },
+    show: { transition: { staggerChildren: prefersReducedMotion ? 0 : 0.15, delayChildren: prefersReducedMotion ? 0 : 0.2 } },
   }
 
-  const fadeUp = {
-    hidden: prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 },
-    show: { opacity: 1, y: 0, transition: { duration: prefersReducedMotion ? 0 : 0.7, ease: [0.16, 1, 0.3, 1] as const } },
+  const opticalItem = {
+    hidden: prefersReducedMotion
+      ? { opacity: 0 }
+      : { opacity: 0, filter: 'blur(12px)', y: 8 },
+    show: {
+      opacity: 1,
+      filter: 'blur(0px)',
+      y: 0,
+      transition: { duration: prefersReducedMotion ? 0.3 : 1.2, ease: [0.16, 1, 0.3, 1] as const },
+    },
   }
 
   return (
     <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6">
 
       <motion.div
-        variants={stagger}
+        variants={opticalContainer}
         initial="hidden"
-        animate="show"
+        animate={showSplash ? "hidden" : "show"}
         className="relative z-10 mx-auto w-full max-w-[1280px] md:pl-[10%]"
       >
 
-        <motion.h1 variants={fadeUp} className="type-hero">
+        <motion.h1 variants={opticalItem} className="type-hero">
           Denis
           <span className="sr-only"> — Frontend-Focused Fullstack Engineer</span>
         </motion.h1>
 
         <motion.p
-          variants={fadeUp}
+          variants={opticalItem}
           aria-hidden="true"
           className="type-body-lead mt-2 text-text-muted"
         >
@@ -51,13 +60,13 @@ export default function Hero() {
         </motion.p>
 
         <motion.p
-          variants={fadeUp}
+          variants={opticalItem}
           className="mt-5 max-w-md font-body text-[clamp(1rem,1.5vw,1.25rem)] font-light leading-relaxed text-text-secondary"
         >
           Building where data meets design.
         </motion.p>
 
-        <motion.div variants={fadeUp} className="mt-10 flex items-center gap-6">
+        <motion.div variants={opticalItem} className="mt-10 flex items-center gap-6">
           <button
             type="button"
             onClick={() => scrollTo('#work')}
