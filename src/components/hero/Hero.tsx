@@ -36,9 +36,6 @@ export default function Hero() {
         animate="show"
         className="relative z-10 mx-auto w-full max-w-[1280px] md:pl-[10%]"
       >
-        <motion.p variants={fadeUp} className="type-label-accent mb-5">
-          Portfolio — 2026
-        </motion.p>
 
         <motion.h1 variants={fadeUp} className="type-hero">
           Denis

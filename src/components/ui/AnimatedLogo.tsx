@@ -9,6 +9,8 @@ function cn(...inputs: ClassValue[]) {
 
 interface AnimatedLogoProps {
   className?: string
+  layoutId?: string
+  animatePaths?: boolean
 }
 
 /*
@@ -34,36 +36,38 @@ interface AnimatedLogoProps {
  * Plus Jakarta Sans 800 reference.
  */
 
-export default function AnimatedLogo({ className }: AnimatedLogoProps) {
+export default function AnimatedLogo({ className, layoutId, animatePaths = true }: AnimatedLogoProps) {
   const [isHovered, setIsHovered] = useState(false)
   const prefersReducedMotion = useReducedMotion()
-  const skip = !!prefersReducedMotion
+  
+  // Skip drawing animation if reduced motion is enabled OR we explicitly disable it
+  const skipDraw = !!prefersReducedMotion || !animatePaths
 
   // Orchestrate staggered drawing
   const containerVariants: Variants = {
     initial: {},
     animate: {
-      transition: { staggerChildren: skip ? 0 : 0.08, delayChildren: skip ? 0 : 0.15 }
+      transition: { staggerChildren: skipDraw ? 0 : 0.08, delayChildren: skipDraw ? 0 : 0.15 }
     }
   }
 
   // Stroke-drawing animation for paths
   const draw: Variants = {
-    initial: { pathLength: skip ? 1 : 0, opacity: skip ? 1 : 0 },
+    initial: { pathLength: skipDraw ? 1 : 0, opacity: skipDraw ? 1 : 0 },
     animate: {
       pathLength: 1,
       opacity: 1,
-      transition: { duration: skip ? 0 : 1, ease: 'easeInOut' }
+      transition: { duration: skipDraw ? 0 : 1, ease: 'easeInOut' }
     }
   }
 
   // Pop-in animation for dots (circles)
   const pop: Variants = {
-    initial: { scale: skip ? 1 : 0, opacity: skip ? 1 : 0 },
+    initial: { scale: skipDraw ? 1 : 0, opacity: skipDraw ? 1 : 0 },
     animate: {
       scale: 1,
       opacity: 1,
-      transition: { duration: skip ? 0 : 0.35, ease: 'easeOut' }
+      transition: { duration: skipDraw ? 0 : 0.35, ease: 'easeOut' }
     }
   }
 
@@ -78,6 +82,10 @@ export default function AnimatedLogo({ className }: AnimatedLogoProps) {
 
   return (
     <motion.div
+      layoutId={layoutId}
+      transition={{ 
+        layout: { type: "spring", bounce: 0, duration: 0.8 } 
+      }}
       className={cn('relative flex items-center', className)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -88,7 +96,7 @@ export default function AnimatedLogo({ className }: AnimatedLogoProps) {
     >
       <svg
         viewBox="-1 -3 96 38"
-        className="h-7 w-auto overflow-visible text-text-primary transition-colors duration-300 hover:text-accent"
+        className="h-full w-auto overflow-visible text-text-primary transition-colors duration-300 hover:text-accent"
         xmlns="http://www.w3.org/2000/svg"
       >
         <motion.g variants={containerVariants}>
