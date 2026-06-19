@@ -61,14 +61,15 @@ export default function ExperienceList() {
             <motion.li
               key={exp.id}
               variants={itemVariants}
-              className="group border-t border-border py-8 transition-colors hover:border-accent/50 md:py-12"
+              className="group border-t border-border py-8 md:py-12"
             >
               <article className="grid gap-6 md:grid-cols-[1fr_2.5fr] md:gap-12">
                 <div className="flex flex-col gap-1 md:pt-1">
                   <h4 className="font-display text-base font-semibold text-accent transition-colors group-hover:text-accent/80">{exp.company}</h4>
                   <p className="type-label text-text-muted">
                     <time dateTime={exp.start_date}>{formatDate(exp.start_date)}</time>
-                    <span className="sr-only"> to </span>
+                    <span aria-hidden="true"> — </span>
+                    <span className="sr-only">to </span>
                     {exp.end_date ? (
                       <time dateTime={exp.end_date}>{formatDate(exp.end_date)}</time>
                     ) : 'Present'}
