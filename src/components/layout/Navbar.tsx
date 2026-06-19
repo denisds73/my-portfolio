@@ -20,8 +20,19 @@ export default function Navbar() {
   const showSplash = useContext(SplashContext)
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 80)
+    const handleScroll = () => {
+      const heroContent = document.getElementById('hero-content')
+      if (heroContent) {
+        const rect = heroContent.getBoundingClientRect()
+        // Navbar is roughly 84px tall. Trigger blur when content is ~100px from top.
+        setScrolled(rect.top <= 100)
+      } else {
+        setScrolled(window.scrollY > 80)
+      }
+    }
     window.addEventListener('scroll', handleScroll, { passive: true })
+    // Initial check
+    handleScroll()
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -87,15 +98,15 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 z-50 w-full transition-all duration-500 ${
+      className={`fixed top-0 z-50 w-full border-b transition-all duration-500 ${
         scrolled
-          ? 'border-b border-border bg-bg/80 backdrop-blur-2xl'
-          : 'bg-transparent'
+          ? 'border-white/5 bg-bg/80 backdrop-blur-2xl'
+          : 'border-transparent bg-transparent'
       }`}
     >
       <nav
         className="mx-auto flex max-w-[1280px] items-center justify-between px-6 transition-all duration-500"
-        style={{ paddingTop: scrolled ? '12px' : '24px', paddingBottom: scrolled ? '12px' : '24px' }}
+        style={{ paddingTop: scrolled ? '16px' : '28px', paddingBottom: scrolled ? '16px' : '28px' }}
       >
         <a href="/" aria-label="Home" className="focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm h-7 flex items-center">
           {!showSplash && <AnimatedLogo layoutId="main-logo" animatePaths={false} className="h-7" />}
@@ -169,6 +180,17 @@ export default function Navbar() {
         </button>
         </motion.div>
       </nav>
+
+      {/* Progressive blur trail below the navbar */}
+      <div 
+        className={`absolute left-0 top-full h-12 w-full pointer-events-none backdrop-blur-xl transition-opacity duration-500 ${
+          scrolled ? 'opacity-100' : 'opacity-0'
+        }`}
+        style={{
+          maskImage: 'linear-gradient(to bottom, black 0%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black 0%, transparent 100%)'
+        }}
+      />
 
       {/* Mobile fullscreen overlay */}
       <AnimatePresence>
