@@ -18,9 +18,11 @@ import { createContext } from 'react'
 export const SplashContext = createContext(true)
 
 export default function App() {
-  const [showSplash, setShowSplash] = useState(true)
+  const [showSplash, setShowSplash] = useState(() => window.location.pathname === '/')
 
   useEffect(() => {
+    if (!showSplash) return
+
     // Force scroll to top on initial mount to prevent browser history scroll restoration
     // from causing a slight offset during the splash screen
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
@@ -39,7 +41,7 @@ export default function App() {
     }
 
     return () => clearTimeout(timer)
-  }, [])
+  }, [showSplash])
 
   return (
     <SplashContext.Provider value={showSplash}>
