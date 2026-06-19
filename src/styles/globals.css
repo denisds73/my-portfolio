@@ -94,20 +94,23 @@ body {
 .gradient-mesh::after {
   content: '';
   position: absolute;
-  inset: 0;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
   background: radial-gradient(
-    circle 400px at 50% 50%,
-    rgba(94, 106, 210, 0.04) 0%,
+    circle 500px at 50% 50%,
+    rgba(94, 106, 210, 0.05) 0%,
     transparent 100%
   );
   animation: mesh-drift 20s ease-in-out infinite alternate;
 }
 
 @keyframes mesh-drift {
-  0%   { transform: translate(-15%, -10%); }
-  33%  { transform: translate(10%, 15%); }
-  66%  { transform: translate(15%, -5%); }
-  100% { transform: translate(-10%, 10%); }
+  0%   { transform: translate(-5%, -5%); }
+  33%  { transform: translate(5%, 5%); }
+  66%  { transform: translate(5%, -5%); }
+  100% { transform: translate(-5%, 5%); }
 }
 
 /* Micro film grain — subconscious analog warmth */
