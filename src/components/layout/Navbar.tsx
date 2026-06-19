@@ -36,6 +36,21 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  const [enableLayoutId, setEnableLayoutId] = useState(true)
+
+  useEffect(() => {
+    if (!showSplash) {
+      // Allow the splash-to-navbar layout animation to complete, then remove the layoutId 
+      // so it doesn't cause flying glitches on future page navigations.
+      const timer = setTimeout(() => {
+        setEnableLayoutId(false)
+      }, 1500)
+      return () => clearTimeout(timer)
+    } else {
+      setEnableLayoutId(true)
+    }
+  }, [showSplash])
+
   // Active section tracking — scroll-position based (reliable with async sections)
   useEffect(() => {
     const mapToNav = (id: string): string => {
@@ -120,7 +135,7 @@ export default function Navbar() {
           aria-label="Back to top" 
           className="focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm h-7 flex items-center"
         >
-          {!showSplash && <AnimatedLogo layoutId="main-logo" animatePaths={false} className="h-7" />}
+          {!showSplash && <AnimatedLogo layoutId={enableLayoutId ? "main-logo" : undefined} animatePaths={false} className="h-7" />}
         </a>
 
         {/* The rest of the navbar contents fade in after the splash screen */}
