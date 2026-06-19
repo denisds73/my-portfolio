@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useContext } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import AnimatedLogo from '../ui/AnimatedLogo'
+import { SplashContext } from '@/App'
 
 const navLinks = [
   { label: 'About', href: '#about' },
@@ -16,6 +17,7 @@ export default function Navbar() {
   const [activeSection, setActiveSection] = useState('')
   const prefersReducedMotion = useReducedMotion()
   const motionDuration = prefersReducedMotion ? 0 : 0.3
+  const showSplash = useContext(SplashContext)
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 80)
@@ -95,12 +97,19 @@ export default function Navbar() {
         className="mx-auto flex max-w-[1280px] items-center justify-between px-6 transition-all duration-500"
         style={{ paddingTop: scrolled ? '12px' : '24px', paddingBottom: scrolled ? '12px' : '24px' }}
       >
-        <a href="/" aria-label="Home" className="focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm">
-          <AnimatedLogo />
+        <a href="/" aria-label="Home" className="focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm h-7 flex items-center">
+          {!showSplash && <AnimatedLogo layoutId="main-logo" animatePaths={false} className="h-7" />}
         </a>
 
-        {/* Desktop nav links */}
-        <div className="hidden items-center gap-10 md:flex">
+        {/* The rest of the navbar contents fade in after the splash screen */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: showSplash ? 0 : 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="flex items-center gap-10"
+        >
+          {/* Desktop nav links */}
+          <div className="hidden items-center gap-10 md:flex">
           {navLinks.map((link) => (
             <button
               key={link.href}
@@ -158,6 +167,7 @@ export default function Navbar() {
             />
           </div>
         </button>
+        </motion.div>
       </nav>
 
       {/* Mobile fullscreen overlay */}
