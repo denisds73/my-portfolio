@@ -48,7 +48,7 @@ export default function Hero() {
   }
 
   return (
-    <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6">
+    <section className="relative flex min-h-[100svh] items-center overflow-hidden px-6">
 
       <motion.div
         id="hero-content"
