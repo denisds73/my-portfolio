@@ -125,14 +125,14 @@ function ProjectEntry({ project, onOpenDetails }: { project: Project; onOpenDeta
             </p>
           )}
           <div
-            className={`reveal mt-10 flex flex-wrap items-center gap-3 ${ 
+            className={`reveal mt-10 flex w-full flex-wrap items-center gap-3 ${ 
               visible ? 'visible' : ''
             }`}
             style={{ transitionDelay: '0.36s' }}
           >
             <button
               onClick={handleInteract}
-              className="group/link inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-white/5 border border-white/10 px-5 py-2.5 font-body text-[0.8rem] tracking-[0.08em] uppercase text-text-primary transition-all hover:bg-white/10 hover:border-white/20 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="group/link inline-flex w-full sm:w-auto cursor-pointer items-center justify-center gap-2 rounded-full bg-white/5 border border-white/10 px-5 py-2.5 font-body text-[0.8rem] tracking-[0.08em] uppercase text-text-primary transition-all hover:bg-white/10 hover:border-white/20 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               aria-label={`View details for ${project.title}`}
             >
               {project.detail_type === 'case_study' ? 'Case Study' : 'Project Breakdown'}
@@ -146,7 +146,7 @@ function ProjectEntry({ project, onOpenDetails }: { project: Project; onOpenDeta
                 href={project.live_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group/link inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-border bg-transparent px-4 py-2.5 font-body text-[0.8rem] tracking-[0.08em] uppercase text-text-muted transition-all hover:border-white/20 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="group/link inline-flex flex-1 sm:flex-initial cursor-pointer items-center justify-center gap-2 rounded-full border border-border bg-transparent px-4 py-2.5 font-body text-[0.8rem] tracking-[0.08em] uppercase text-text-muted transition-all hover:border-white/20 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                 aria-label={`View ${project.title} live (opens in new tab)`}
               >
                 Live
@@ -160,7 +160,7 @@ function ProjectEntry({ project, onOpenDetails }: { project: Project; onOpenDeta
                 href={project.github_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group/link inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-border bg-transparent px-4 py-2.5 font-body text-[0.8rem] tracking-[0.08em] uppercase text-text-muted transition-all hover:border-white/20 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="group/link inline-flex flex-1 sm:flex-initial cursor-pointer items-center justify-center gap-2 rounded-full border border-border bg-transparent px-4 py-2.5 font-body text-[0.8rem] tracking-[0.08em] uppercase text-text-muted transition-all hover:border-white/20 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                 aria-label={`View source for ${project.title} (opens in new tab)`}
               >
                 Source
