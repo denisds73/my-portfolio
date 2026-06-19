@@ -9,14 +9,25 @@ export default function Hero() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 100) setCueVisible(false)
+      if (window.scrollY > 100) {
+        setCueVisible(false)
+        window.removeEventListener('scroll', handleScroll)
+      }
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   const scrollTo = (id: string) => {
-    document.querySelector(id)?.scrollIntoView({ behavior: 'smooth' })
+    const element = document.querySelector(id)
+    if (element) {
+      const offset = 84 // navbar height
+      const bodyRect = document.body.getBoundingClientRect().top
+      const elementRect = element.getBoundingClientRect().top
+      const elementPosition = elementRect - bodyRect
+      const offsetPosition = elementPosition - offset
+      window.scrollTo({ top: offsetPosition, behavior: 'smooth' })
+    }
   }
 
   const opticalContainer = {
@@ -40,6 +51,7 @@ export default function Hero() {
     <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6">
 
       <motion.div
+        id="hero-content"
         variants={opticalContainer}
         initial="hidden"
         animate={showSplash ? "hidden" : "show"}
@@ -67,20 +79,20 @@ export default function Hero() {
         </motion.p>
 
         <motion.div variants={opticalItem} className="mt-10 flex items-center gap-6">
-          <button
-            type="button"
-            onClick={() => scrollTo('#work')}
+          <a
+            href="#work"
+            onClick={(e) => { e.preventDefault(); scrollTo('#work'); }}
             className="cursor-pointer font-body text-sm tracking-[0.08em] uppercase text-accent transition-opacity hover:opacity-70"
           >
             View Work <span aria-hidden="true">→</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollTo('#contact')}
+          </a>
+          <a
+            href="#contact"
+            onClick={(e) => { e.preventDefault(); scrollTo('#contact'); }}
             className="cursor-pointer font-body text-sm tracking-[0.08em] uppercase text-text-muted transition-colors hover:text-text-primary"
           >
             Get in Touch
-          </button>
+          </a>
         </motion.div>
       </motion.div>
 
