@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
 import { LayoutDashboard, FolderKanban, Wrench, Briefcase, FileText, LogOut, ExternalLink } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import AnimatedLogo from '@/components/ui/AnimatedLogo'
 
 const navItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -36,10 +37,10 @@ export default function AdminLayout() {
     <div className="flex min-h-screen bg-background">
       <aside className="fixed left-0 top-0 flex h-screen w-60 flex-col border-r border-border bg-surface">
         <div className="border-b border-border px-5 py-4">
-          <Link to="/" className="font-mono text-lg font-semibold text-text-primary">
-            denis<span className="text-accent">.</span>
+          <Link to="/" className="flex items-center" aria-label="View Site">
+            <AnimatedLogo animatePaths={false} className="h-7" />
           </Link>
-          <p className="mt-0.5 text-xs text-text-muted">Admin Panel</p>
+          <p className="mt-2 text-xs text-text-muted">Admin Panel</p>
         </div>
 
         <nav className="flex-1 space-y-1 p-3">
